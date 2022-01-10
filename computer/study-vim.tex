@@ -1,0 +1,134 @@
+\documentclass{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\begin{document}
+	\title{vim学习}
+	\author{王鹏祥}
+	\date{\chntoday}
+	\maketitle
+	\newpage
+
+\section{vi,vim优势}
+\begin{itemize}
+	\item 所有linux都内置vi文本编辑器
+	\item {\color{red}巨多}软件编辑接口会主动调用vi(比如说texstudio很多时候编译不了，vim都可以编译)
+	\item vim有程序编辑能力（以字体颜色辨别语法正确）
+	\item 程序简单，编译快速
+\end{itemize}
+\section{使用}
+参考网址：\url{https://www.cnblogs.com/uncle-qi/p/9356465.html}
+参考网址：\url{https://www.imooc.com/learn/1129}
+\begin{itemize}
+	\item 一般模式　一打开文件的时候所处模式，可以进行删除、复制、黏贴等操作.
+	\item 编辑模式　　可以编辑内容，按ｉ进入编辑模式，[esc]进入一般模式
+	\item 命令行模式　进行数据查找，大量字符替换等操作，按"/""?"":"进入
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{figures/vim}
+\end{figure}
+\subsection{常用操作}
+\begin{itemize}
+	\item vim 文件名 \\打开文件　
+	\item :wq \\保存并退出文件 
+	\item :e! \\放弃修改，编辑区回复原样
+	\item :w 路径/新文件名 另存为
+	\item u \\撤销
+	\item ctrl+r \\反撤销
+	\item . \\执行上一个命令
+	\item !shell命令 \\与shell命令行进行交互
+	\item gq \\重新排版
+\end{itemize}
+
+\subsection{光标定位}
+	\begin{itemize}
+	\item :n \\跳转到第n行
+	\item \$ \\光标定位到行尾
+	\item 0 \\光标移动到行首
+	\item pageup、pagedown \\向上向下翻页
+	\item G \\光标移动到最后一行　
+	\item 数字＋上下左右　\\移动光标多少行　
+	\end{itemize}
+\subsection{删除}
+一般要处于命令模式下
+	\begin{itemize}
+	\item d0 \\删除光标左边的文本
+	\item d\$ \\删除光标右边的文本
+	\item dd \\删除(剪切)光标所在行的文本
+	\item dG \\删除光标所在行之后的所有行
+	\end{itemize}
+	\remark{上面的命令前加数字代表删除的范围扩大相应的倍数}
+\subsection{剪切复制黏贴}
+	\begin{itemize}
+	\item yy \\复制光标所在的行
+	\item p \\黏贴
+	\item dd \\剪切光标所在的行
+	\item 可视模式下加y，比较方便
+	\item 
+	\end{itemize}
+\subsection{替换和插入}
+	\begin{itemize}
+	\item :[替换起始处，替换结束处] s/被替换的字符/替换的字符/[g][c]
+	\item \$代表行尾	
+	\item g选项表示替换目标行中所有匹配的字符
+	\item c表示替换以互动形式进行
+	\item \^代表行首，\$代表行尾
+    \item 行首行尾插入只要在被替换的字符换上面的符号即可
+	\end{itemize}
+\subsection{查找}
+	\begin{itemize}
+	\item 向下(上)寻找一个名称为word的字符串　/word(?word)
+	\item 重复前一个查找操作　n(N为反向)
+	\end{itemize}
+\subsection{多窗口编辑}
+	\begin{itemize}
+	\item :sp 文件名2 \\以水平打开第二个文件的窗口
+	\item ctrl+w h(j、k、l) \\切换窗口
+	\item close \\关闭当前窗口
+	\item vi -O filenames \\在垂直分割的多个窗口中编辑多个文件。
+	\item vi -o filenames \\在水平分割的多个窗口中编辑多个文件。
+	\item ctrl+w H \\窗口调整为垂直分割
+	\item ctrl+w K \\窗口调整为水平分割
+	\end{itemize}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

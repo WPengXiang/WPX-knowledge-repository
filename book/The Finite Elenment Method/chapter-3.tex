@@ -1,0 +1,281 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{2维空间的分片多项式}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+
+本章主要是将将分段多项式的逼近由以为变成二维，其最主要的变化是在对网格的剖分上，不再是一段一段的而是变为三角形，因此导致数据结构也产生相应的变化。
+\section{三角形网格}
+设$\Omega \subset \mathbb{R}^{2}$是一个二维有着光滑或者多边形区域$\partial \Omega$。在这个区域的三角形划分是由三角形的单元 $K$ 组成的集合 $\{K\}$, 即 $\Omega = \cup_{K\in\mcK}K$。两个三角形的交集可能为边(edges)、角(nodes)、或者不相交。边还要进一步划分为内部边(interior edges)用集合$\mcE_I$ 表示，边界边（boundary edges）用集合$\mcE_B$表示。
+\subsection{判断标准}
+网格的好坏通常会用chunkiness参数来判断，其对每个单元的定义为
+$$
+c_{K}=h_{K} / d_{K}
+$$
+其中$h_{K}$单元最大边长，$d_{K}$为内切圆的直径。如果存在一个常数$c_0$使得对于所有的$c_{K}$都有$c_{K} \geq c_{0}$则称网格是规则(regular)的。网格是否规则对之后的分段线性空间将会产生影响。
+
+整体网格大小用 $h=\text{max}_{K\in\mcK}h_K$来评估.
+
+准一致网格,意思是所有剖分单元的网格尺寸 $h_k$ 大致相等, 其对于任意两个剖分单元 $K$ 和 $K'$, 存在一个常数 $\rho$满足
+
+$$
+\rho<h_k/h_{k'}<\rho_{-1}
+$$
+
+\subsection{数据结构}
+表示一个三角网格通常使用两个矩阵：结点矩阵(point matrix)和连接矩阵(connectivity matrix)。
+
+结点矩阵：两行、结点个数列，每列分别是节点的横纵坐标。
+
+连接矩阵：三行、单元个数列，每一列三个数字为结点在节点矩阵中所位于的列数，表示一个单元，顺序为逆时针方向，起始点可以随便选择。
+
+\subsection{Matlab下生成网格}
+MATLAB有一组非标准例程，称为“pde-Toolbox”，其中包括用于创建高质量二维几何三角形的Delaunay网格生成器.
+
+用法为给定几何矩阵、算法模式和参数，最后声称节点矩阵、连接矩阵和边界矩阵。
+
+[p, e t] = initmesh (0.1 g, hmax,)
+
+几何矩阵形式为：第一行为维度，第二三行为结点横坐标值，第四五行为结点纵坐标值，第六七行为区域位于边的左侧还是右侧。每一列表示一个边界。
+
+\section{分片多项式空间}
+\subsection{线性多项式空间}
+设Ｋ是一个三角形单元, 定义 K 上的多项式空间
+
+\begin{equation}
+    \mbP_1(K) = \{v: v = c_0 + c_1x_1 + c_2x_2, 
+    (x_1, x_2) \in K, c_0, c_1, c_2 \in \mbR\}
+\end{equation}
+
+对于Ｋ上任意函数可以由三个结点值所决定，假设给定结点值$a_i$以及相应的节点 $N_i=(x_1^{(i)},x_2^{(i)})$,则由此计算函数$v$, 得到线
+性方程组
+
+\begin{equation}
+\left[\begin{array}{ccc}
+{1} & {x_{1}^{(1)}} & {x_{2}^{(1)}} \\
+{1} & {x_{1}^{(2)}} & {x_{2}^{(2)}} \\
+{1} & {x_{1}^{(3)}} & {x_{2}^{(3)}}
+\end{array}\right]\left[\begin{array}{c}
+{c_{0}} \\
+{c_{1}} \\
+{c_{2}}
+\end{array}\right]=\left[\begin{array}{c}
+{\alpha_{1}} \\
+{\alpha_{2}} \\
+{\alpha_{3}}
+\end{array}\right]
+\end{equation}
+
+可以发现其系数矩阵行列式等于单元Ｋ面积的两倍。这意味着有唯一解。
+
+其基函数可以自然地选择$\{1, x_1, x_2\}$,也可以是结点基函数
+
+\begin{equation}
+\lambda_{j}\left(N_{i}\right)=\left\{\begin{array}{ll}
+{1,} & {i=j} \\
+{0,} & {i \neq j}
+\end{array} i, j=1,2,3\right.
+\end{equation}
+
+
+\subsection{连续分片多项式空间}
+
+$\mcK$ 是三角剖分的集合, $K \in \mcK$, 定义$\mcK$ 上的分片连续多项式空间
+
+\begin{equation}
+    \mbV_h = \{v: v\in C^0(\Omega), v|_K \in \mbP_1(K), \forall K \in \mcK\}
+\end{equation}
+
+其中 $C^0(\Omega)$ 是区间 $\Omega$ 上的连续函数空间
+
+$V_h$ 上的函数 $v$ 被节点值$\{v(N_j)\}_{j=1}^{n_p}$ 所决定，同样可做结点基。这组基 $\varphi_j$ 只在把点 $N_j$ 作为公共点的三角形组成的区域不为0。
+
+\begin{equation}
+    \varphi_j(x_i) = \begin{cases}
+        1, \quad \text{if} \, i = j \\
+        0, \quad \text{if} \, i \ne j \\
+    \end{cases},
+    \quad i, j = 0, 1, \cdots, n
+\end{equation}
+
+这组基 $\varphi_j$ 只在把点 $N_j$ 作为公共点的三角形组成的区域不为0，也叫做帽函数。
+
+\subsection{分片常数空间}
+分片常数空间定义为
+\begin{equation}
+W_{h}=\left\{w:\left.w\right|_{K} \in P_{0}(K), \forall K \in \mathcal{K}\right\}
+\end{equation}
+其中$P_{0}(K)$为单元Ｋ上的常值函数
+
+为测量函数值在边上的大小，习惯上用两种算子平均算子(average operators)和跳跃算子(jump operator)
+
+平均算子：符号表示为$\langle\cdot\rangle$，定义为
+\begin{equation}
+\langle w\rangle=\frac{w^{+}+w^{-}}{2}, \quad x \in E
+\end{equation}
+其中$w^{+}+w^{-}$在一条边上的两个单元的不同值。
+
+跳跃算子：符号表示为$[\cdot]$，定义为
+\begin{equation}
+[w]=w^{+}-w^{-}, \quad x \in E
+\end{equation}
+
+
+\section{插值}
+\subsection{线性插值}
+
+在三角形单元 $K$ 上定义连续的线性插值 $\pi f \in \mbP_1(K)$ 
+
+\begin{equation}
+    \pi f(x) = \sum_{i=1}^{3} f(N_i) \varphi_i,
+\end{equation}
+其在三个节点$N_i$处与函数重合 $\pi f(N_i) = f(N_i)$.
+
+令 $D$ 与 $D^2$ 为微分算子,定义为
+\begin{equation}
+D f=\left(\left|\frac{\partial f}{\partial x_{1}}\right|^{2}+\left|\frac{\partial f}{\partial x_{2}}\right|^{2}\right)^{1 / 2}, \quad D^{2} f=\left(\left|\frac{\partial^{2} f}{\partial x_{1}^{2}}\right|^{2}+2\left|\frac{\partial^{2} f}{\partial x_{1} \partial x_{2}}\right|^{2}+\left|\frac{\partial^{2} f}{\partial x_{2}^{2}}\right|^{2}\right)^{1 / 2}
+\end{equation}
+
+由此再定义$L^2(I)$ 范数
+\begin{equation}
+\|f\|_{L^{2}(\Omega)}=\left(\int_{\Omega} f^{2} d x\right)^{1 / 2}
+\end{equation}
+
+我们使用 $L^2(I)$ 范数测量插值误差.
+
+\begin{proposition}
+    插值误差满足下面估计
+    \begin{align*}
+        \|f- \pi f\|_{L^2(K)} &\leq 
+    C h^2_K \|D^2 f\|_{L^2(K)} \\
+        \|D(f - \pi f)\|_{L^2(K)} &\leq
+        C h_K^2 \|D^2 f\|_{L^2(K)} 
+    \end{align*}
+    
+\end{proposition}
+
+
+\subsection{连续的分片线性插值}
+定义 $\Omega$ 上的在网格 $\mcK$ 上的连续分段线性插值 $\pi f\in V_h$, 即
+
+$$
+\pi f=\sum_{i=1}^{n_p}f(N_i)\varphi_i
+$$
+
+其在节点处与函数值一样
+
+\begin{proposition}
+    插值误差满足下面估计
+    \begin{align*}
+        \|f- \pi f\|^2_{L^2(\Omega)} &\leq 
+        C \sum_{K \in \mcK} h^4_K \|D^2 f\|^2_{L^2(K)} \\
+        \|D(f - \pi f)\|^2_{L^2(\Omega)} &\leq
+        C \sum_{K \in \mcK}h_K^2 \|D^2 f\|^2_{L^2(K)} 
+    \end{align*}
+\end{proposition}
+
+
+\section{$L^2$ 投影}
+
+给定函数 $f \in L^2(\Omega)$, 则它的 $L^2$ 投影 $P_hf \in \mbV_h$ 定义为
+
+\begin{equation}\label{1}
+    \int_\Omega (f - P_hf)v \mathrm{d} \bfx = 0, \quad \forall v \in \mbV_h
+\end{equation}
+
+\subsection{$L^2$ 投影求解推导}
+
+对\ref{1}中的ｖ特取为基函数$\varphi_i$，则有
+
+\begin{equation}
+    \int_{\Omega} (f - P_hf)\varphi_i \mathrm{d} \bfx = 0, 
+    \quad i = 1, 2, \cdots, n_{p}.
+\end{equation}
+
+$n_{p}$ 是空间 $\mbV_h$ 的基函数的个数。
+
+由于$P_hf \in \mbV_h$属于$\mbV_h$，因此可以表示为
+
+\begin{equation}
+P_{h} f=\sum_{j=1}^{n_{p}} \xi_{j} \varphi_{j}
+\end{equation}
+
+其中$\xi_{j}$为未知的系数，再带入\ref{1}便得到
+
+\begin{equation}
+\begin{aligned}
+\int_{\Omega} f \varphi_{i} d x &=\int_{\Omega}\left(\sum_{j=1}^{n_{p}} \xi_{j} \varphi_{j}\right) \varphi_{i} d x \\
+&=\sum_{j=1}^{n_{p}} \xi_{j} \int_{\Omega} \varphi_{j} \varphi_{i} d x
+\end{aligned}
+\end{equation}
+
+这样便得到质量矩阵$M_i$
+$$
+M_{i j}=\int_{\Omega} \varphi_{j} \varphi_{i} d x, \quad i, j=1,2, \ldots, n_{p}
+$$
+
+过载向量$B_i$
+$$
+b_{i}=\int_{\Omega} f \varphi_{i} d x, \quad i=1,2 \ldots, n_{p}
+$$
+
+解方程组便可得到$\xi_{j}$，从而求出$L^2$ 投影。
+\subsection{$L^2$ 投影的几个定理}
+\begin{theorem}
+    由式 (\ref{1}) 定义的 $L^2$ 投影 $\Pi_h f$ 存在且唯一.
+\end{theorem}
+
+
+\begin{theorem}
+    由式 (\ref{1}) 定义的 $L^2$ 投影 $\Pi_h f$ 满足最优估计
+    
+    \begin{equation}
+        \| f - \Pi_h f\|_{L^2(\Omega)} \le \|f - v\|_L^2(\Omega), 
+        \forall v \in \mbV_h.
+    \end{equation}
+\end{theorem}
+
+
+\begin{theorem}
+   由式 (\ref{1}) 定义的 $L^2$ 投影 $\Pi_h f$  满足估计    
+    \begin{equation}
+        \| f - \Pi_h f\|^2_{L^2(\Omega)} \le C 
+        \sum_{K\in \mcK}\|D^2 f\|^2_{L^2(\Omega)}
+    \end{equation}
+\end{theorem}
+
+\section{三角单元上的几种积分公式}
+
+三角形单元Ｋ的一般求积规则是这种形式
+
+\begin{equation}
+\int_{K} f d x \approx \sum_{j} w_{j} f\left(q_{j}\right)
+\end{equation}
+
+其中$q_{j}$为Ｋ上一组积分点，$\{\omega_j\}$是相应的权重
+
+具体形式有以下几种
+
+\subsection{center of gravity rule}
+\begin{equation}
+\int_{K} f d x \approx f\left(\frac{N_{1}+N_{2}+N_{3}}{3}\right)|K|
+\end{equation}
+
+\subsection{corner quadrature formula}
+\begin{equation}
+\int_{K} f d x \approx \sum_{i=1}^{3} f\left(N_{i}\right) \frac{|K|}{3}
+\end{equation}
+
+\subsection{two-dimensuonal Mid-point rule}
+\begin{equation}
+\int_{K} f d x \approx \sum_{1 \leq i<j \leq 3}^{3} f\left(\frac{N_{i}+N_{j}}{2}\right) \frac{|K|}{3}
+\end{equation}
+
+
+\end{document}

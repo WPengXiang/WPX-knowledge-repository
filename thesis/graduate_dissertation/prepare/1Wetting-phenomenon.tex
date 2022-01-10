@@ -1,0 +1,83 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\begin{document}
+\title{湿润现象}
+\author{王鹏祥}
+\date{2019.7.2}
+\maketitle
+
+		\section{研究模型}\setlength{\parindent}{2em}
+		液滴滴在一个表面上，达到平衡状态时能量的变化
+		\begin{align}
+		F=\gamma_{LV}A_{LV}+(\gamma_{SL}-\gamma{SV})A_{SL}\\
+		\end{align}
+		其中$\gamma_{LV}\,\gamma_{SL}\,\gamma{SV}$分别表示固-气，固-液和液-气表面张力\\
+		A距离，面积\\
+		F极小泛函能量
+		
+	   对于液滴问题上式改写为
+	   \begin{align}
+	   F/\gamma_{LV}=A_{LV}-\cos\theta A_{SL}
+	   \end{align}
+	   且带有约束条件
+	   $\oint dv=v$(体积不变)
+		\section{一些定义和概念}
+		\subsection{湿润}
+		1.固体（或液体）表面上气体被液体(或另一种互不相容液体)取代的现象.\\ 
+		  液体与固体表面接触的能力.
+		  
+		2.一定温度和压力下，湿润的程度可用湿润的过程的吉布斯函数(吉布斯自由能)来衡量。吉布斯函数越低越多，越易湿润。
+		
+		3.吉布斯自由能：系统减少的内能中可以转化为对外做功的部分\\
+		\begin{align}
+		G = U - TS + pV = H - TS
+		\end{align}
+		其中U是系统的内能，T是温度(绝对温度，K)，S是熵，p是压强，V是体积，H是焓。
+		吉布斯自由能的微分形式是：
+		\begin{align}
+     	dG = - SdT + Vdp + \mu dN
+		\end{align}
+		$\mu$为化学势
+		
+		4.化学势：化学势是物理内容丰富的热力学强度量，化学势是表征系统与媒质，或系统相与相之间，或系统组元之间粒子转移的趋势。粒子总是从高化学势向低化学势区域、相或组元转移，直到两者相等才相互处于化学平衡。
+		\subsection{一些性质}
+		1.同向异性：如果各个方向的测量结果是相同的，说明其物理性质与取向无关，就称为各向同性。如果物理性质和取向密切相关，不同取向的测量结果迥异，就称为各向异性。
+		
+		2.刚性：指两个物体相碰撞不会发生变形
+		
+		\subsection{接触角}
+		1.当系统达到平衡时，在气液固三相交界点，气-液与气-固界面张立之间的夹角.\\
+		 
+\begin{figure}[H]
+\centering
+\includegraphics[height=6.0cm,width=9.5cm]{figures/1-1.png}
+\caption{}
+\end{figure}
+
+       2.yong方程(湿润方程)\\
+       
+\begin{figure}[H]
+	\centering
+	\includegraphics[height=6.0cm,width=9.5cm]{figures/1-2.png}
+	\label{fig:2}
+\end{figure}
+        
+        3.接触角滞后：实固体表面在一定程度上或者粗糙不平或者化学组成不均一,这就使得实际物体表面上的接触角并非如Young 方程所预示的取值唯一。而是在相对稳定的两个角度之间变化,这种现象被称为接触角滞后现象。
+\section{一些问题和体会}\setlength{\parindent}{2em}
+首先最大的问题是不知道最小表面自由能量泛函是如何建立的，可能是由于还没有看泛函和变分原理导引导致的。关于GitHub还有很多需要学习的，比如一些Markdowm语言，还有起一些先关操作。
+
+有几个我在学习中发现的不错的网址
+
+1.关于湿润模型的ppt，http://www.doc88.com/p-4127669482377.html
+
+2.关于GitHub的https://segmentfault.com/blog/stormzhang。
+
+3.关于Markdown语言 https://www.jianshu.com/p/q81RER。
+
+4.两份关于湿润的文献  湿润现象的附着力与内聚力 庞礼军\\
+
+\end{document} 

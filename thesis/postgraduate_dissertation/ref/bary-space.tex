@@ -1,0 +1,658 @@
+
+% !Mode:: "TeX:UTF-8"
+\documentclass{beamer}
+
+\usetheme{Darmstadt}
+\useinnertheme{rounded}
+
+\usecolortheme{beaver}
+%\usecolortheme{albatross}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+%\usecolortheme{default}
+
+
+\setbeamerfont*{frametitle}{size=\normalsize,series=\bfseries}
+\setbeamertemplate{navigation symbols}{}
+
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+
+\usepackage{biblatex}
+\addbibresource{ref.bib}
+
+\usefonttheme[onlymath]{serif}
+\numberwithin{subsection}{section}
+%\usefonttheme[onlylarge]{structurebold}
+\setbeamercovered{transparent}
+
+\title{FEALPy 偏微分方程数值解程序设计与实现: 
+    {\bf 任意次任意维的拉格朗日有限元空间}}
+\author{魏华祎}
+\institute[XTU]{
+weihuayi@xtu.edu.cn\\
+\vspace{5pt}
+湘潭大学$\bullet$数学与计算科学学院\\
+}
+ 
+\date[XTU]
+{
+    \today
+}
+
+
+\AtBeginSection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsection] 
+  }
+}
+
+\AtBeginSubsection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsubsection] 
+  }
+}
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{重心坐标函数}
+\begin{frame}
+    \frametitle{单纯形上的重心坐标函数}
+\begin{onlyenv}<1>
+    记 $\{\bfx_i:=[x_{i,0}, x_{i, 1}, \ldots, x_{i, d-1}]\}_{i=0}^d$ 为 $\mbR^d$ 空
+间中的一组点, 假设它们不在同一个超平面上, 也即是说 $d$ 个向量 $\bfx_0\bfx_1$,
+$\bfx_0\bfx_2$, $\cdots$, 和 $\bfx_0\bfx_d$ 是线性无关的, 等价于矩阵
+\begin{equation*}
+    \bfA =\begin{bmatrix}
+        x_{0, 0} & x_{1, 0} & \cdots & x_{d, 0} \\
+        x_{0, 1} & x_{1, 1} & \cdots & x_{d, 1} \\
+        \vdots   & \vdots   & \ddots & \vdots \\
+        x_{0, d-1} & x_{1, d-1} & \cdots & x_{d, d-1}\\
+        1 & 1 & \cdots & 1
+    \end{bmatrix}
+\end{equation*}
+是非奇异的.
+\end{onlyenv}
+\begin{onlyenv}<2>
+    给定任一点 $\bfx=[x_0, x_1, \cdots, x_{d-1}]^T\in \mbR^d$, 求解如下线
+性代数系统, 可得一组实数值 $\blambda := [\lambda_0(\bfx), \lambda_1(\bfx),
+\cdots, \lambda_d(\bfx)]^T$:
+\begin{equation*}
+    \bfA \blambda= \bfx, 
+\end{equation*}
+满足如下性质
+\begin{equation*}
+    \bfx = \sum\limits_{i=0}^{d}\lambda_i(\bfx) \bfx_i,
+    \quad\sum\limits_{i=0}^{d}\lambda_i(\bfx) = 1.
+\end{equation*}
+点集 $\{\bfx_i\}_{i=0}^d$ 形成的凸壳
+\begin{equation*}
+    \tau = \{\bfx = \sum_{i=0}^{d}\lambda_i\bfx_i | 0\leq \lambda_i \leq
+    1, \sum_{i=0}^d\lambda_i = 1\}
+\end{equation*}
+称为一个{\bf 几何 $d$-单纯形}. $\blambda$ 称为 $\bfx$ 对应的{\bf 重心坐标}向量.
+\end{onlyenv}
+\begin{onlyenv}<3>
+易知, $\lambda_0(\bfx)$, $\lambda_1(\bfx)$, $\cdots$, 和 $\lambda_{d}(\bfx)$
+是关于 $\bfx$ 线性函数, 且 
+\begin{equation*}
+    \lambda_i(\bfx_j) = 
+    \begin{cases}
+        1, & i = j\\
+        0, & i\not= j
+    \end{cases}, 
+    i, j = 0, \cdots, d
+\end{equation*}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}
+    \frametitle{区间单元 $[x_0, x_1]$ 上的重心坐标函数}
+给定区间单元上的一个重心坐标 $(\lambda_0, \lambda_1)$, 存在
+$ x \in [x_0, x_1]$, 使得：
+\[
+\lambda_0 := \frac{x_1 - x}{x_1 - x_0}, \quad
+\lambda_1 := \frac{x  - x_0}{x_1 - x_0}
+\]
+显然 
+\[
+\lambda_0 + \lambda_1 = 1
+\]
+重心坐标关于$ x $ 的导数为：
+\[
+\frac{\rmd \lambda_0}{\rmd x} = -\frac{1}{x_1 - x_0},\quad
+\frac{\rmd \lambda_1}{\rmd x} = \frac{1}{x_1 - x_0}
+\]
+\end{frame}
+
+\begin{frame}
+    \frametitle{三角形单元 $[\bfx_0, \bfx_1, \bfx_2]$ 上的重心坐标函数}
+因为 $\lambda_0, \lambda_1, \lambda_2$ 是关于 $\bfx$ 线性函数，它梯度分别为:
+$$
+\begin{aligned}
+\nabla\lambda_0 = \frac{1}{2|\tau|}(\bfx_2 - \bfx_1)\bfW\\
+\nabla\lambda_1 = \frac{1}{2|\tau|}(\bfx_0 - \bfx_2)\bfW\\
+\nabla\lambda_2 = \frac{1}{2|\tau|}(\bfx_1 - \bfx_0)\bfW\\
+\end{aligned}
+$$
+其中 
+$$
+\bfW = \begin{bmatrix}
+0 & 1\\ -1 & 0 
+\end{bmatrix}
+$$
+注意这里的 $\bfx_0$, $\bfx_1$, 和 $\bfx_2$ 是行向量。
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{三角形单元上的重心坐标函数的梯度计算}
+    \begin{listing}[H]
+        \tiny
+    \begin{pythoncode}
+import numpy as np
+from fealpy.mesh import MeshFactory
+mf = MeshFactory()
+box = [0, 1, 0, 1]
+mesh = mf.boxmesh2d(box, nx=1, ny=1, meshtype='tri') 
+NC = mesh.number_of_cells()
+
+node = mesh.entity('node')
+cell = mesh.entity('cell')
+v0 = node[cell[:, 2], :] - node[cell[:, 1], :] # $x_2 - x_1$
+v1 = node[cell[:, 0], :] - node[cell[:, 2], :] # $x_0 - x_2$
+v2 = node[cell[:, 1], :] - node[cell[:, 0], :] # $x_1 - x_0$
+nv = np.cross(v2, -v1)
+
+Dlambda = np.zeros((NC, 3, 2), dtype=np.float64)
+length = nv # 
+W = np.array([[0, 1], [-1, 0]], dtype=np.int_)
+Dlambda[:,0,:] = v0@W/length.reshape(-1, 1)
+Dlambda[:,1,:] = v1@W/length.reshape(-1, 1)
+Dlambda[:,2,:] = v2@W/length.reshape(-1, 1)
+    \end{pythoncode}
+    \caption{重心坐标梯度的计算代码。}
+    \end{listing}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{作业}
+    \begin{itemize}
+        \item[(1)] 给定一个一维区间网格, 计算每个单元上的重心坐标函数的导数。
+{\tiny
+            \begin{minted}[autogobble]{python}
+import numpy as np
+from fealpy.mesh import IntervalMesh
+node = np.array([[0.0], [0.5], [1.0]], dtype=np.float64)
+cell = np.array([[0, 1], [1, 2]], dtype=np.int_)
+mesh = IntervalMesh(node, cell)
+            \end{minted}
+}
+        \item[(2)] 给定一个三维四面体网格，计算每个单元上的重心坐标函数的梯度。
+{\tiny
+            \begin{minted}[autogobble]{python}
+import numpy as np
+from fealpy.mesh import MeshFactory 
+
+mf = MeshFactory()
+mesh = mf.one_tetrahedron_mesh(meshtype='iso')
+            \end{minted}
+}
+    \end{itemize}
+\end{frame}
+
+\section{任意维任意次拉格朗日有限元空间的构造}
+
+\begin{frame}
+    \frametitle{$d+1$ 维多重指标}
+    记 $\bfm$ 为 $d+1$  维多重指标向量 $[m_0, m_1, \cdots, m_d]$, 满足  
+\begin{equation*}
+    m_i \geq 0, i=0, 1, \cdots, d, \text{ and } \sum_{i=0}^d m_i=p.
+\end{equation*}
+固定次数 $p$, $\bfm$ 的所有可能取值个数为 
+\begin{equation*}
+    n_p := \begin{pmatrix}
+        d \\ p+d 
+    \end{pmatrix}
+    =\begin{cases}
+        p+1, & 1D\\
+        \frac{(p+1)(p+2)}{2}, & 2D\\
+        \frac{(p+1)(p+2)(p+3)}{6}, & 3D
+    \end{cases}
+\end{equation*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{多重指标向量 $\bfm$ 编号规则}
+记 $\alpha$ 为多重向量指标 $\bfm$ 的一个从 0 到 $n_p-1$ 一维编号, 编号规则如下: 
+\begin{table}[H]
+    \tiny
+    \centering
+    \begin{tabular}{| l | c | c | c | c | c|}
+    \hline
+    $\alpha$ & \multicolumn{5}{c|}{$\bfm_\alpha$} \\\hline
+    0 & p   & 0 & 0 & $\cdots$ & 0 \\\hline
+    1 & p-1 & 1 & 0 & $\cdots$ & 0 \\\hline
+    2 & p-1 & 0 & 1 & $\cdots$ & 0 \\\hline
+    $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\\hline
+    d & p-1 & 0 & 0 & $\cdots$ & 1 \\\hline
+    d+1 & p-2 & 2 & 0 & $\cdots$ & 0 \\\hline
+    d+2 & p-2 & 1 & 1 & $\cdots$ & 0 \\\hline
+    $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\\hline
+    2d-1 & p-2 & 1 & 0 & $\cdots$ & 1 \\\hline
+    2d & p-2 & 0 & 2 & $\cdots$ & 0 \\\hline
+    $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\\hline
+    $n_p$ & 0 & 0 & 0 & $\cdots$ & p \\
+    \hline
+    \end{tabular}
+    \caption{多重指标 $\bfm_\alpha$ 的编号规则.}\label{tb:num}
+\end{table}
+\end{frame}
+
+\begin{frame}
+    \frametitle{高次拉格朗日形函数的一般公式}
+给定第 $\alpha$ 个多重指标向量 $\bfm_\alpha$, 在 $d$-单纯形 $\tau$ 上可以构造如
+下的 $p$ 次多项式函数:
+\begin{equation}
+    \phi_{\alpha} = \frac{1}{\bfm_\alpha!}\prod_{i=0}^{d}\prod_{j_i =
+    0}^{m_i - 1} (p\lambda_i - j_i).
+    \label{eq:phi0}
+\end{equation}
+其中
+\begin{align*}
+    \bfm_\alpha! = m_0!m_1!\cdots m_d!,\quad\quad \prod_{j_i=0}^{-1}(p\lambda_i -
+    j_i) = 1,\quad i=0, 1,\cdots, d 
+\end{align*}
+\vspace{-0.5cm}
+\begin{block}{Sylvester's Formula}
+$$
+R_i(p,\lambda)=
+\begin{cases}
+\frac{1}{i!}\prod_{j_i=0}^{i-1} (p\lambda-j_i),~& 1\leq i\leq p\\
+1,& i=0\\
+\end{cases}
+$$
+\end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{$d$-单纯形上的插值点}
+每个多重指标 $\bfm_\alpha$, 都对应$d$-单纯形 $\tau$ 上的一个点 $\bfx_\alpha$, 
+\begin{equation*}
+    \bfx_\alpha = \sum_{i=0}^d \frac{m_i}{p} \bfx_i. 
+\end{equation*}
+其中 $m_i$ 是多重指标向量 $\bfm_\alpha$ 的第 $i$ 个分量. 易知 
+$\bfx_\alpha$ 是 $\phi_{\alpha}$ 对应的插值点, 满足 
+\begin{equation}
+    \phi_\alpha(\bfx_\beta) = 
+    \begin{cases}
+        1, & \alpha = \beta\\
+        0, & \alpha \ne \beta
+    \end{cases}
+    \text{ 和 }\alpha, \beta = 0, 1, \cdots, n_p - 1
+    \label{eq:phi1}
+\end{equation}
+\end{frame}
+
+\begin{frame}
+    \frametitle{插值点的局部编号规则}
+\begin{onlyenv}<1>
+    $$
+    \phi_{m,n,k} = \frac{1}{m!n!k!}\prod_{j_0 = 0}^{m - 1}
+    (p\lambda_0 - j_0) \prod_{j_1 = 0}^{n-1}(p\lambda_1 -
+    j_1) \prod_{j_2 = 0}^{k-1}(p\lambda_2 - j_2).
+    $$
+    \begin{figure}[h]
+        \centering
+        \includegraphics[scale=0.6]{./figures/dof3.png}
+        \caption{三角形上的 $p=3$ 次形函数对应的编号规则.}
+    \end{figure}
+\end{onlyenv}
+\begin{onlyenv}<2>
+    \vspace{-0.8cm}
+    $$
+    \phi_{m,n,k} = \frac{1}{m!n!k!}\prod_{j_0 = 0}^{m - 1}
+    (p\lambda_0 - j_0) \prod_{j_1 = 0}^{n-1}(p\lambda_1 -
+    j_1) \prod_{j_2=0}^{k-1}(p\lambda_2 - j_2).
+    $$
+    \vspace{-0.5cm}
+    \begin{figure}[h]
+        \centering
+        \includegraphics[scale=0.6]{./figures/dof4.png}
+    \caption{三角形上的 $p=4$ 次形函数对应的编号规则.}
+    \end{figure}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.3]{figures/int.pdf}
+    \includegraphics[scale=0.3]{figures/intdof4.pdf}
+    \caption{区间上的 $p=4$ 次形函数对应的编号规则}
+\end{figure}
+\end{onlyenv}
+\begin{onlyenv}<4>
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.3]{figures/tet.pdf}
+    \includegraphics[scale=0.3]{figures/tetdof4.pdf}
+    \caption{四面体上的 $p=4$ 次形函数对应的编号规则.}
+\end{figure}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}
+    \frametitle{$\phi_\alpha$ 的数组化计算过程}
+首先构造向量和矩阵
+\begin{equation*}
+    \tiny
+    P = \left[\frac{1}{0!}, \frac{1}{1!}, \frac{1}{2!}, \cdots, \frac{1}{p!}\right],
+\end{equation*}
+$$
+\tiny
+\bfA :=                                                                            
+\begin{bmatrix}  
+1  &  1  & \cdot & 1 \\
+p\lambda_0 & p\lambda_1 & \cdots & p\lambda_d\\                                             
+p\lambda_0 - 1 & p\lambda_1 - 1 & \cdots & p\lambda_d - 1\\   
+\vdots & \vdots & \ddots & \vdots \\                                                     
+p\lambda_0 - (p - 1) & p\lambda_1 - (p - 1) & \vdots & p\lambda_d - (p - 1)
+\end{bmatrix},
+$$
+\begin{block}{Remark}
+$$
+ \phi_{\alpha} = \frac{1}{\bfm_\alpha!}\prod_{j_0 = 0}^{m_0 - 1} (p\lambda_0 -
+ j_0) \prod_{j_1 = 0}^{m_1 - 1} (p\lambda_1 - j_1)\cdots\prod_{j_d = 0}^{m_d -
+ 1} (p\lambda_d - j_d)
+$$
+\end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{$\phi_\alpha$ 的数组化计算过程}
+$$
+\tiny
+\bfB = \mathrm{diag}(\bfP)
+\begin{bmatrix}
+1 & 1 & \cdots & 1 \\
+p\lambda_0 & p\lambda_1 & \cdots & p\lambda_d\\
+\prod_{j_0=0}^{1}(p\lambda_0 - j_0) & 
+\prod_{j_1=0}^{1}(p\lambda_1 - j_1) &
+\cdots &
+\prod_{j_d=0}^{1}(p\lambda_d - j_d) \\
+\vdots & \vdots & \ddots & \vdots \\
+\prod_{j_0=0}^{p-1}(p\lambda_0 - j_0) &
+\prod_{j_1=0}^{p-1}(p\lambda_1 - j_1) &
+\cdots & 
+\prod_{j_d=0}^{p-1}(p\lambda_d - j_d)
+\end{bmatrix}
+$$
+\begin{onlyenv}<1>
+\begin{block}{Remark}
+$$
+ \phi_{\alpha} = 
+ \frac{1}{\bfm_\alpha!}
+ \prod_{j_0 = 0}^{m_0 - 1} (p\lambda_0 - j_0)
+ \prod_{j_1 = 0}^{m_1 - 1} (p\lambda_1 - j_1)
+ \cdots
+ \prod_{j_d = 0}^{m_{d} - 1} (p\lambda_d - j_d)
+$$
+\end{block}
+\end{onlyenv}
+\begin{onlyenv}<2>
+注意 $\bfB$ 包含 $\phi_\alpha$ 的所有计算模块, 可重写  $\phi_\alpha$ 为如下形式
+:
+\begin{equation*}
+    \phi_\alpha = \prod_{i=0}^d\bfB[m_i, i]
+\end{equation*}
+其中 $m_i$ 为 $\bfm_\alpha$ 的第 $i$ 个分量.
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{任意次任意维拉格朗日有限元基函数代码实现}
+\vspace{-0.5cm}
+\begin{listing}[H]
+\tiny
+    \begin{pythoncode}
+def basis(self, bc): # bc.shape = (NQ, TD+1)
+    p = self.p   # The degree of polynomial basis function
+    TD = self.TD # The toplogy dimension of the mesh 
+    multiIndex = self.dof.multiIndex # The multiindex matrix of $m_\alpha$
+
+    # construct vector $P=(\frac{1}{1!}, \frac{1}{2!}, \cdots, \frac{1}{p!})$.
+    c = np.arange(1, p+1, dtype=np.int)
+    P = 1.0/np.multiply.accumulate(c)
+
+    # construct the matrix $A$.
+    t = np.arange(0, p)
+    shape = bc.shape[:-1]+(p+1, TD+1)
+    A = np.ones(shape, dtype=self.ftype)
+    A[..., 1:, :] = p*bc[..., np.newaxis, :] - t.reshape(-1, 1)
+    
+    # construct matrix $B$ and here we still use the memory of $A$
+    np.cumprod(A, axis=-2, out=A)
+    A[..., 1:, :] *= P.reshape(-1, 1)
+
+    # compute $\phi_\alpha$ 
+    idx = np.arange(TD+1)
+    phi = np.prod(A[..., multiIndex, idx], axis=-1)
+    return phi[..., np.newaxis, :] # (NQ, 1, ldof)
+    \end{pythoncode}
+    \caption{拉格朗日有限元基函数计算展示代码。}
+\end{listing}
+\vspace{-0.5cm}
+{\footnotesize
+注意这里为清晰的展示代码，去掉了一些非必要的代码， 全部代码见 fealpy/functionspace/LagrangeFiniteELementSpace.py。
+}
+\end{frame}
+
+\begin{frame}
+    \frametitle{$\nabla\phi_\alpha$ 的数组化计算过程}
+\begin{onlyenv}<1>
+为计算 $\nabla\phi_\alpha$, 首先需要用到函数乘积求导法则来计算 $\prod_{j_i =
+0}^{m_i - 1} (p\lambda_i - j_i)$ 的导数, 即
+\begin{equation*}
+    \nabla \prod_{j_i = 0}^{m_i - 1} (p\lambda_i - j_i)
+    = p\sum_{j_i=0}^{m_i - 1}
+    \prod_{0\le k \le m_i-1, k\not= j_i}(p\lambda_i - k)\nabla \lambda_i.
+\end{equation*}
+\begin{block}{Remark}
+    这是一种标量的表达方式!
+\end{block}
+\begin{block}{Remark}
+$$
+ \phi_{\alpha} = 
+ \frac{1}{\bfm_\alpha!}
+ \prod_{j_0 = 0}^{m_0 - 1} (p\lambda_0 - j_0)
+ \prod_{j_1 = 0}^{m_1 - 1} (p\lambda_1 - j_1)
+ \cdots
+ \prod_{j_d = 0}^{m_{d} - 1} (p\lambda_d - j_d)
+$$
+\end{block}
+\end{onlyenv}
+\begin{onlyenv}<2>
+用数组化的方式, 需要首先构造 $d+1$ 阶矩阵 
+$$
+\bfD^i = 
+\begin{pmatrix}
+p & p\lambda_i-0 & \cdots & p\lambda_i-0 \\
+p\lambda_i - 1 & p & \cdots & p\lambda_i - 1 \\
+\vdots & \vdots & \ddots & \vdots \\
+p\lambda_i - (p-1) & p\lambda_i - (p-1) & \cdots & p 
+\end{pmatrix}
+, \quad 0 \le i \le d, 
+$$
+把 $\bfD^i$  的每一列做累乘运算，然后取其下三角矩阵，再每一行求和, 即可得到矩阵
+$\bfB$ 的每一列各个元素的求导后系数. 可得到矩阵 $\bfD$，其元素定义为
+$$
+D_{i,j} = \sum_{m=0}^j\prod_{k=0}^j D^i_{k, m},\quad 0 \le i \le d,
+\text{ and }0 \le j \le p-1.
+$$
+\end{onlyenv}
+\begin{onlyenv}<3>
+进而可以计算 $\nabla\bfB$ 
+$$
+\begin{aligned}
+\nabla \bfB = & \mathrm{diag}(\bfP)
+\begin{pmatrix}
+0 & 0 & \cdots & 0 \\
+D_{0,0} \nabla \lambda_0 &
+D_{1,0} \nabla \lambda_1 & \cdots&
+D_{d,0} \nabla \lambda_d \\
+\vdots & \vdots & \ddots & \vdots \\
+D_{0, p-1} \nabla \lambda_0 &
+D_{1, p-1} \nabla \lambda_1 & \cdots &
+D_{d, p-1} \nabla \lambda_d
+\end{pmatrix}\\
+= & \mathrm{diag}(\bfP)
+\begin{pmatrix}
+\bfzero\\
+\bfD
+\end{pmatrix}
+\begin{pmatrix}
+\nabla \lambda_0 &  &  & \\
+ & \nabla \lambda_1 & & \\
+ & & \ddots & \\
+ & & & \nabla \lambda_d
+\end{pmatrix}\\
+\end{aligned}
+$$
+\end{onlyenv}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{数组化编程的一些总结}
+    \begin{itemize}
+        \item[$\bullet$] 算法的数组化表达是数组化编程的基础和关键。数组化的表达要明确：
+            \begin{itemize}
+                \item[$\square$] 算法的输入数组是什么?
+                \item[$\square$] 算法最终期望得到的数组是什么？
+                \item[$\square$] 算法中间需要的数组运算是什么？
+            \end{itemize}
+        \item[$\bullet$] 代数学是算法数组化表达的有力工具。
+    \end{itemize}
+\end{frame}
+
+\section{FEALPy 中的 LagrangeFiniteELementSpace 类}
+
+\begin{frame}
+    \frametitle{有限维空间的实现关键}
+    Galerkin 类型的离散方法，其程序实现的关键是{\bf 有限维空间的实现}，而有限维
+    空间的实现的关键是
+    \begin{itemize}
+        \item[$\bullet$] 基函数及其导数计算
+            \begin{itemize}
+                \item[$\square$] 主要是计算空间基函数及其导数在数值积分点处的值。
+            \end{itemize}
+        \item[$\bullet$] 全局和局部自由度的管理
+            \begin{itemize}
+                \item[$\square$] 全局自由度的编号规则，这与最终的离散代数系统中
+                    矩阵的行号和列号相对应。 
+                \item[$\square$] 局部自由度的编号规则，即基函数在每个单元上的
+                    形函数的编号。 
+                \item[$\square$] 局部自由度和全局自由度的对应规则，这是单元矩阵
+                    组装与总矩阵需要知道的关键信息。 
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{LagrangeFiniteELementSpace 类的命名和接口约定}
+    \begin{onlyenv}<1>
+        \begin{table}[H]
+            \scriptsize
+            \centering
+            \begin{tabular}{|l|l|}\hline
+                mesh & 网格对象\\\hline
+                p    & 空间的次数 \\\hline
+                GD   & 几何空间的维数 \\\hline
+                TD   & 几何空间的拓扑维数 \\\hline
+                dof  & 函数空间的自由度管理对象, 用于管理函数空间的自由度 \\\hline
+                ftype & 函数空间所用的浮点数类型 \\\hline
+                itype & 函数空间所用的整数类型 \\\hline
+                integralalg & 数值积分算法类  \\\hline
+                spacetype & 函数空间的类型， 'C' 表示分片连续空间， 'D' 表示断空间\\\hline
+            \end{tabular}
+            \caption{ LagrangeFiniteElementSapce 的常用数据成员（属性）。}
+        \end{table}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+        \vspace{-0.5cm}
+        \begin{table}[H]
+            \scriptsize
+            \centering
+            \begin{tabular}{|l|l|}\hline
+                ldof = space.number\_of\_local\_dofs() & 获得每个单元上的自由度个数
+                \\\hline
+                gdof = space.number\_of\_global\_dofs() & 获得所有单元上的总自由度个数
+                \\\hline
+                cell2dof = sapce.cell\_to\_dof() & 获得单元与自由度的对应关系数组
+                \\\hline
+                bdof = space.boundary\_dof() & 获得边界的自由度
+                \\\hline
+                phi = space.basis(bc, ... )  & 计算单元上积分点处的基函数值
+                \\\hline
+                gphi = space.grad\_basis(bc, ...) & 计算单元上积分点处的基函数梯度值
+                \\\hline
+                val = space.value(uh, bc, ...) & 计算有限元函数值
+                \\\hline
+                val = space.grad\_value(uh, bc, ...) & 计算有限元函数梯度值 \\\hline
+                uI = space.interpolation(u) & 计算函数 u 在有限元空间中的插值函数
+                \\\hline
+                uh = space.function(...) &  创建拉格朗日有限元空间的函数对象
+                \\\hline
+                A = space.stiff\_matrix(...) & 构造刚度矩阵
+                \\\hline
+                M = space.mass\_matrix(...) & 构造质量矩阵
+                \\\hline
+                F = space.source\_vector(.. .) & 构造源项向量
+                \\\hline
+            \end{tabular}
+            \caption{ LagrangeFiniteElementSapce 常用方法成员（属性），其中省略
+            号表示有默认参数。}
+        \end{table}
+    \end{onlyenv}
+    \begin{onlyenv}<3>
+        \begin{remark}
+            FEALPy 中的其它类型的有限维空间对象和拉格朗日有限元空间遵
+            守几乎一样的命名和接口约定。
+        \end{remark}
+    \end{onlyenv}
+\end{frame}
+
+\begin{frame}
+    \frametitle{LagrangeFiniteELementSpace 调用演示}
+    \begin{itemize}
+        \item[(1)] 基函数及其导数的计算
+        \item[(2)] 自由度管理
+        \item[(3)] PDE 模型定义
+        \item[(4)] 有限元函数与插值
+        \item[(5)] 误差计算 
+        \item[(6)] 刚度矩阵组装
+        \item[(7)] 质量矩阵组装
+        \item[(8)] 载荷向量的组装
+        \item[(9)] 边界条件的处理
+    \end{itemize}
+\end{frame}
+
+\end{document}

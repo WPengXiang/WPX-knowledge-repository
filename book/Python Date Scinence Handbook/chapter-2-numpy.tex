@@ -1,0 +1,65 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{第二章:Numpy学习}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+\section{numpy数组的几种操作}
+\subsection{数组的属性}
+
+\begin{itemize}
+\item ndim:维度
+\item shape:每个维度的大小
+\item size:数组的总大小，每个维度的乘积
+\item dtype:数据类型
+\item itemsize:每个数组元素字节大小
+\item nbytes:数组总字节大小，即itemsize和size乘积
+\end{itemize}
+
+\subsection{数组的索引}
+
+\begin{itemize}
+\item 可以用负值索引，－１就代表倒数第一个，０代表第一个
+\item {\color{red} numpy数组类型固定，当数据类型为int时候，输入float型会自动截短}
+
+\end{itemize}
+
+\subsection{数组的切片}
+
+\begin{itemize}
+\item x[start:stop:step]:{\color{red}包含start.不包含stop,从０开始}
+\item start默认为０，stop默认为维度的大小，step默认为１
+\item 步长可以为负，
+\item x[::-1]:逆序数组，这里start和stop默认交换
+\item 多维数组同样可以采用这种方法来进行切片
+\item 通过空切片(一个：)，实现整行或者整列的提取
+\item {\color{red}数组切片返回的是数组的视图，而不是副本，改变视图原始数据也会改变}
+\item 可以通过.copy()方法创造副本
+\end{itemize}
+
+\subsection{数组的变形}
+
+\begin{itemize}
+\item .reshape()方法可以改变数组的形状
+\item 该方法前提是原始数组大小(元素个数)
+
+\subsection{数组的拼接和分裂}
+\begin{itemize}
+\item 拼接主要用np.concatenate([要拼接的数组],要按照哪个轴拼)
+\item 拼接还有两个操作是np.vstack(垂直栈拼)，np.hstack
+\item 分裂主要使用np.split(要分裂的数组,(分裂点的位置))
+\item {color{red}ｎ个分点，会得到n+1个数组}
+\item 分裂还有两个操作刚好与第二点相反np.hsplit，np.vsplit
+
+
+\end{itemize}
+\end{itemize}
+%\cite{fem_2010}
+%\bibliographystyle{abbrv}
+%\bibliography{../../ref}
+\end{document}

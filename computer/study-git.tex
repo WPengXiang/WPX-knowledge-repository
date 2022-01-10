@@ -1,0 +1,148 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass[12pt,a4paper]{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\title{git 学习手册}
+\author{王鹏详}
+\date{2019.7.18}
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\newpage
+
+		\section{preface}\setlength{\parindent}{2em}
+		之前在实习的时候学的有点匆忙，很多地方不是太明白，这回把我自己在学习git时候的体会和一些心得写一下。目的是希望之后学习git的同志能效率更快一点，不会像我一样耗费很多时间（也还好主要实习占了一些时间）。
+		
+		刚上手git的时候很懵，不知道这个东西是干什么，看了progit还是不是很了解，一开始照着progit上的操作一步一步打，出现了很多错误（后来才知道是路径没选对）。相对去初学者我更推荐去看廖雪峰的git教程，上面不止是有每一步的代码，还会有视频得出操作，更关键的是其教的东西都是最基本最关键的，很多用不上的里边也不会说，对于初学者来说学习的效率会更快。看完廖雪峰的教程再看progit会更加流畅。
+		
+		附：廖雪峰git网站https://www.liaoxuefeng.com/wiki/896043488029600
+
+		\section{git基本知识}
+		首先学习git前，要先知道为啥要学git，他能帮助我们干什么，我认为只有知道了这个，之后在学习git操作的时候才不会不知所措，一脸懵逼。
+		\subsection{git是啥}
+	    官方的话来说Git是目前世界上最先进的分布式版本控制系统。我自己的话来就是可以更好的对文件进行管理，外加还可以多人协调工作。
+	    \subsection{为啥学git}
+	    git的功能可能有很多，各种各样。但我自己认为git就是时光机+任意门。
+	    
+	    时光机意思是git可以将文件变回到任意时间下它所处的样子，举个例子就像玩游戏，你可以在打boss前保存一下，如果输了，不用从头开始，只要从存档点开始就可以。git就可给文件在任意时刻设定一个存档点，当你编写的文件出错的时候，可以随时从存档点开始。
+	    
+	    任意门的意思就是，git可以把文件瞬间传输到任意一台电脑上。配个图片易于理解
+\begin{figure}[H]
+	\centering
+    \includegraphics[scale=1]{figures/0.jpg} 	
+	\caption{}
+	\label{fig:0}
+\end{figure}
+        每一台电脑间的文件都可以互通的，在实际操作的时候通常会有一个github，github相当于中央处理器，多人合作时候每个人把东西传到github上，再从github下载别人的文件。
+        
+        官方的话是这样的。git属于分布式版本控制系统，其根本没有“中央服务器”，每个人的电脑上都是一个完整的版本库，这样，你工作的时候，就不需要联网了，因为版本库就在你自己的电脑上。既然每个人电脑上都有一个完整的版本库，那多个人如何协作呢？比方说你在自己电脑上改了文件A，你的同事也在他的电脑上改了文件A，这时，你们俩之间只需把各自的修改推送给对方，就可以互相看到对方的修改了。
+        
+        \subsection{git工作流程}
+        首先要先知道git的三个工作区域和四个工作状态。
+        
+        三个工作区域是，git仓库，git工作目录，git暂存区域。\\git工作目录这个最好理解，就是我们看文件夹里的文件。\\git仓库是，你是看不见的（可以在github上看），这里边放的是你完成一个项目，要分享给别人东西。\\暂存区域是指当你修改一个文件后，你要将他放到一个地方，这个地方放里的所用东西是准备要提交到git仓库中的。
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{figures/1.jpg}
+	\caption{stage是暂存区域，master就是git仓库}
+	\label{fig:1}
+\end{figure}
+
+        四个工作状态分别未追踪，未修改，已修改，已暂存            
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{figures/3.png}
+	\caption{}
+	\label{fig:3}
+\end{figure}
+       当你新建一个文件就是属于未追踪，你需要通过add命令把他加到暂存区，这时他就被git追踪到了，之后的每一次修改git都会记录。未修改，已修改很好理解，就是看文件你有没有改动过。修改过得你可以通过add加到加到暂存区。已暂存就是在暂存区里的东西喽。
+       
+       git的流程就是，将新建或者修改的文件通过add加到暂存区，然后通过commit将暂存区的东西放入git仓库。很简单的。
+
+		\section{基本操作}
+	    接下来说一下git的基本操作，可能有很多，我主要就写一些工作时候会用到的（其他的我也不会）
+	    
+	    \subsection{创建git}
+	    两个命令一个是 git   init，就是初始一个git。使用方法为，你到一个文加夹下，右键，然后点击git bash here(你的命令是在当前文件夹下完成的)，然后在命令窗口打git init。恭喜你，这个文件夹下的东西你都可以通过git来管理了
+	    
+	    第二个就是git clone。使用方法为，找一个github上你需要的repository（相当于git仓库），然后记住地址，通过这个命令，便可以将repos上的所有文件搞到你电脑上。
+	    \subsection{提交到仓库}
+	    首先下来说一下基本命令
+	    
+	    git status是看现在文件的状态，有啥状态就是之前讲的那些。
+	    git add 将文件放到暂存区，也就是说将文件状态变为已暂存
+	    git commit 将暂存区的东西都提交到git仓库中
+		
+		会着三步你就会将文件提交到git仓库里了，还有一个重要的一点git commit命令最好加上一个-m变为git commit -m“备注的内容”，这样每一次提交你就都知道自己干了些啥。还有要学会经常用git status随时知道文件的状态。通过git diff命令也可以知道暂存前后修改的地方在哪。
+		
+		还有一些额外的命令如忽未跟踪文件用ignore，从暂存区域移除文件git rm，对文件改名git mv。都不太常用就不介绍了。在progit在都用明确的讲解。
+		
+		\subsection{时光机操作}
+		首先要学会用git log查看提交过的版本信息，之后显示的commit id后面带的一些列的数值就是你要退回到那个版本的索引。你也可以通过在git log后面加上--数字，表示之前几次的commit。还有一些--since，--until这里就不详细介绍了。
+		
+		然后就是回退命令git reset --hard [commit id(可以省略后面的，git会自动帮你填补，带是要唯一)]，这个命令变回让你的文件回到你commit的那个版本。
+		
+		此外还有git reflog命令用来记录你的每一次命令
+		
+		命令git checkout -- filename意思就是，把文件在工作区的修改全部撤销，这里有两种情况：\\
+		一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；\\
+		一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。\\
+		总之，就是让这个文件回到最近一次git commit或git add时的状态。
+		
+		\subsection{任意门:远程仓库的管理}
+		这里远程仓库主要指的是github上的repository
+		
+		首先是添加远程仓库，命令为git remote add <hort name><url>,short name代表的是整个url的简写。这个命令我理解的是你可以和你github上的仓库关联在一起了，你可以通过get remote show <short name>来查看你远程仓库的信息。
+		
+		接着是往远程仓库推送文件，命令为git remote push <short name> <banch name> banch name代表的是分支的名称默认为master，之后你就可把你的git仓库里的文件推送到远程仓库了
+		
+		从远程仓库拉取数据是通过git pull <url>便可以将你远程的仓库里文件传到你的本地工作目录里。这里还可以用git fetch 但是这条命令只会将文件搞到你git 仓库中，并不会自动合并会修改你的当前工作区间，还需要通过git merge来合并。还有就是git clone已经在前面讲过这个是完全克隆到你自己的仓库，通常是初始用的。
+		
+		最后是远程仓库的重命名git remote rename。远程仓库的移除命令为git remote rm  <short name>
+		
+		注：第一次推送或克隆可能会遇到SSH警告，具体请查看廖雪峰的网站。
+		
+		
+
+\section{常用操作流程}
+\begin{itemize}
+\item git status -s  查看状态
+	\begin{itemize}
+	\item 第一列是对staging区域而言,第二列是对working目录而言
+    \item ?? 新添加的未跟踪文件	
+	\item A　新添加的
+	\item M 修改的
+	\item D 你本地删除的文件（服务器上还在）
+	\item U 文件没有被合并
+	\item T 文件的类型被修改了	
+	\item R 文件名被修改了
+	\end{itemize}
+\item git add . 提交所有文件
+\item git diff 查看暂存区和工作区的变动
+\item git commit -m　带有注释的添加到版本库
+\item git reset HEAD 取消缓存区的文件
+\item git rm 删除工作区里的文件
+\item git rm -f 删除暂存区里的文件
+\item git rm \verb|--|cached 从暂存区域移除，但保留在当前工作区中
+\item git rm -r 递归删除
+\item git mv 重命名
+\\
+\item git log \verb|--|oneline 查看版本历史
+\item git reset \verb|--|hard 版本回退
+\\
+\item git branch 列出分支或者创建分支
+\item git checkout 切换分支
+\item git branch -d(D) 删除分支
+\item git merge 融合分支
+\\
+\item git tag -a 添加一个带注解的标签
+\item git log --decorate 带标签的查看版本历史
+\end{itemize}
+\section{一些问题和体会}\setlength{\parindent}{2em}
+这里边还有很多的命令都没有写，只是列举了一些基础的命令，还有比如说分支的操作，标签的操作可以在progit中来学习，上面写的都比较清楚。由于是第一次写可能存在一些错误，和理解上的偏差。这次报告目的只是为git初学者来更好理解git，因为我第一回看progit时候真的很多地方都比较懵逼，花的时间也比较多，所以想写这次报告，把自己的一些心得写下来。
+
+\begin{itemize}
+\item git config --global core.quotepath false\\解决中文乱码
+\end{itemize}
+
+\end{document} 

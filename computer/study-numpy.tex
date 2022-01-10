@@ -1,0 +1,76 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass[12pt,a4paper]{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\title{Numpy}
+\usepackage{pythonhighlight}
+\author{王鹏详}
+\date{\chntoday}
+\begin{document}
+	\maketitle
+	\newpage
+	\section{视图}
+	\begin{itemize}
+		\item reshape
+		\item 切片索引
+	\end{itemize}
+	\section{广播}
+	可以广播的情况
+	\begin{itemize}
+		\item  两个数组各维度大小从后往前比对均一致
+		\item  两个数组存在一些维度大小不相等时，有一个数组的该不相等维度大小为1
+	\end{itemize}
+	\section{多维数组组装}
+	\begin{itemize}
+		\item np.ones
+		\item np.zeros
+		\item np.linspace
+		\item np.add.at(a,indices,data)，重复指标会累加(multiply,negative,divide,
+				logical\_and,logicla\_or)
+		\item a[indeces] += data ，中复指标不会累加，只会记录最后一个
+	\end{itemize}
+	\section{原则}
+	\begin{itemize}
+		\item 尽量避免复制数据
+		\item 默认行优先
+		\item 利用视图和广播
+		\item 利用数组化编程
+	\end{itemize}
+	\section{爱因斯坦求和}
+	\textbf{语法}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{figures/einsum}
+		\caption{}
+		\label{fig:einsum}
+	\end{figure}
+	\textbf{常见操作:}
+	\begin{itemize}
+		\item 转置$B_{ij} = A_{ij}$  
+			\begin{python}
+			a = np.arange(0, 9).reshape(3, 3)
+			b = np.einsum('ij->ji', a)
+			\end{python}		
+		\item 全部元素求和$\sum\limits_{ij} A_{ij}$  
+			\begin{python}
+			a = np.arange(0, 9).reshape(3, 3)
+			b = np.einsum('ij->', a)
+			\end{python}
+		\item 某一维度求和$\sum\limits_j A_{ij}$  
+			\begin{python}
+				a = np.arange(0, 9).reshape(3, 3)
+				b = np.einsum('ij->i', a)
+			\end{python}
+		\item 矩阵相乘$C_{ij}=\sum\limits_{k}A_{ik}B_{kj}$
+			\begin{python}
+				a = np.arange(0, 12).reshape(3, 4)
+				b = np.arange(0, 12).reshape(4, 3)
+				c = np.einsum('ik,kj->ij', a, b)
+			\end{python}
+	\end{itemize}
+	
+	\section{稀疏矩阵}	
+\end{document}
+
+
+

@@ -1,0 +1,29 @@
+I"�<blockquote>
+  <p>“There is nothing either good or bad, but thinking makes it so.”</p>
+
+  <p>—Hamlet in <em>Hamlet</em></p>
+</blockquote>
+
+<!--more-->
+
+<p><strong>markdown:</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; “There is nothing either good or bad, but thinking makes it so.”
+&gt;
+&gt; —Hamlet in *Hamlet*
+</code></pre></div></div>
+
+<hr />
+
+<blockquote>
+  <p>“From women’s eyes this doctrine I derive:</p>
+
+  <p>They sparkle still the right Promethean fire;</p>
+
+  <p>They are the books, the arts, the academes,</p>
+
+  <p>That show, contain, and nourish all the world.”</p>
+
+  <p>—Berowne in <em>Love’s Labor’s Lost</em></p>
+</blockquote>
+:ET

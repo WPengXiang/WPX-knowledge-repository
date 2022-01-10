@@ -1,0 +1,104 @@
+% !Mode:: "TeX:UTF-8"
+
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{第一章引论}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{基本格式}
+最优化问题一般形式为
+\begin{align}
+\min f(\bfx) \\
+s.t. \bfx \in \bfX
+\end{align}
+其中$\bfx \in \mcR^n$是决策变量，$f(x)$为目标函数，
+$\bfX \subset \mcR^n$为约束集或可行域。特别的，如果
+约束集$\bfX = \mcR^n$,则为无约束最优化问题
+$$
+\min_{\bfx \in \mcR^n} f(\bfx)
+$$
+约束最优化问题通常写为
+\begin{align*}
+\min f(\bfx) \\
+s.t. c_i(\bfx) &= 0 , i \in \mcE \\
+     c_i(\bfx) &\geq 0 , i \in \mcI
+\end{align*}
+这里E，I是指标集
+
+当目标函数和约束函数为现行函数，问题称为线性规划。当目标函数
+和约束函数至少有一个是变量$\bfx$的非线性函数时，问题成为非线性规划。
+
+\section{数学基础}
+\subsection{范数}
+\begin{definition}{范数}
+映射$\| \cdot \| : R^n \rightarrow R$,具有下列性质,则称为范数:
+\begin{itemize}
+\item[1.] $\| \bfx \| \geq 0 , \forall \bfx \in R^n$ 
+\item[2.] $\| \alpha \bfx  \| = \left| \alpha \right| \| \bfx \| 0 , \forall \alpha \in R,\forall \bfx \in R^n$ 
+\item[3.] $\| \bfx + \bfy \| \leq \| \bfx \| +\| \bfy \| , \forall \bfx,\bfy \in R^n$ 
+\item[4.] $\| \bfx \| = 0 \Leftrightarrow \bfx = 0$ 
+\end{itemize}
+\end{definition}
+
+几种常用的向量范数
+\begin{itemize}
+\item $l_p$向量范数:$1 \leq p \leq \infty $
+$$
+\| \bfx \|_p = (\sum_{i=1}^n |\bfx_i|^p)^{\frac{1}{p}} 
+$$
+\item 椭球向量范数:设$x \in R^n,A \in R^{n \times n}$是对称正定矩阵
+$$
+\|x\|_A = (x^T A x)^{1/2}
+$$
+\end{itemize}
+
+\begin{definition}{矩阵范数}
+设$\bfA \in R^{n \times n}$,其诱导矩阵范数定义为
+$$
+\|\bfA\| = \max_{\bfx \neq 0}\{ \frac{\| \bfA \bfx \| }{\|\bfx\|} \}
+$$
+\end{definition}
+几种常用矩阵范数
+\begin{itemize}
+\item 列和范数:每一列绝对值相加，取最大
+	$$
+	\|A\|_1=\max_j \sum^n_{i=1}|a_{ij}|
+	$$
+\item 行和范数:每一行绝对值相加，取最大
+	$$
+	\|A\|_{\infty}=\max_i \sum^n_{j=1}|a_{ij}|
+	$$
+\item 谱范数:$\lambda_{A^T A}$表示$A^T A$的最大特征值
+	$$
+	\|A\|_{2}=(\lambda_{A^T A})^{1/2}
+	$$
+\item Frobenius范数:
+	$$
+	\|A\|_{F}=[tr(A^t A)]^{1/2}
+	$$
+\end{itemize}
+
+\subsection{矩阵}
+$\|A^{-1}(B-A)\| < 1$代表矩阵B充分接近矩阵A
+\begin{theorem}[von Neumann引理]
+
+设$A,B \in R^{n \times n}$ A可逆，$\|A^{-1} \leq \alpha$,如果$\|A-B\| \leq \beta$,$\alpha \beta < 1$,则B可逆且
+$$
+\|B^{-1}\| \leq \frac{\alpha}{1-\alpha \beta}
+$$
+\remark{这个定理表明B充分接近可逆矩阵A时，B也可逆}
+\end{theorem}
+
+\begin{definition}{广义逆}
+设$A \in C^{m \times n}$(复矩阵空间)，则A的广义逆为$A^{+} \in C^{m \times n}$,它满足
+$$
+AA^{+}A = A, A^{+}AA^{+} = A^{+}, (AA^+)^*=AA^+, (A^+A)^*=A^+A
+$$
+\end{definition}
+\end{document}

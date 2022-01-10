@@ -1,0 +1,136 @@
+\pagestyle{plain}
+\pagenumbering{arabic}    %设置页码格式为arabic,并把页计数器置为1.
+\newpage
+\chapter{绪~论}\label{Chap:Introduction}
+
+\section{有限元方法}
+有限元法($Finite\ Elements\ Method$)是力学，计算数学，计算机技术等多种学科综合发展和结合的产物。
+在大多数工程研究领域，由于科学理论和科学实验的局限性，很多时候无法求得问题的解析解，因此科学计算成
+为一种重要的研究手段，而有限元法是进行科学计算的极为重要的方法之一。
+
+有限元法的实质是将复杂的连续体划分为有限多个简单的单元体，化无限自由度问题为有限自由度问题。在求解
+过程中，通常以位移为基本变量，使用虚位移原理或最小势能原理来求解。其求解问题的一般步骤为
+\begin{enumerate}
+	\item 建立与实际问题相适应的数学模型(微分方程及边值条件)；
+	\item 寻找与数学模型相适应的变分问题；
+	\item 通过伽辽金方法$(Galerkin\ method)$方法建立有限维空间，选择有限元类型和相应的形函数；
+	\item 相关有限元矩阵的组装比如单元刚度矩阵、总刚度矩阵、载荷向量等；
+	\item 边界条件的处理和有限元方程组求解；
+	\item 回到实际问题中去(即解释实际问题)
+\end{enumerate}
+
+其中伽辽金方法里有限维空间的构造和选取是整个有限元算法核心，影响了整个算法的复杂度和精确性,在其它常见的微分方程数值解法中，有限维度空间的构造都有着重要的地位，比如有限体积法、谱方法、虚单元法，弱$Galerkin$法。
+
+伽辽金方法是由俄罗斯数学家鲍里斯·格里戈里耶维奇·伽辽金（俄文：Борис Григорьевич Галёркин 英文：Boris Galerkin）发明的一种数值分析方法。应用这种方法可以将求解微分方程问题(通过方程所对应泛函的变分原理)简化成为线性方程组的求解问题。
+
+我们以具有D氏边界条件的possion方程
+\begin{eqnarray}
+	-\Delta u(\mathbf x) &=& f(\mathbf x),\text{ on } \Omega.\label{eq:P}\\
+	u|_{\partial\Omega} &=& 0.
+\end{eqnarray}
+为例来演示该方法的使用
+
+我们首先建立其变分问题，对方程\eqref{eq:P}两边同时乘以$v \in H^1_0(\Omega) := \{v\in H^1(\Omega), v|_{\partial\Omega} = 0\}$，然后做分部积分可得:
+\begin{align*}
+	f(u,v) &\triangleq  \int_{\Omega} f v \mathrm{d}x = \int_{\Omega}- \Delta u v \mathrm{d}x  \\ 
+	&=-v\nabla u \big|_{\partial \Omega} + \int_{\Omega} \nabla u\cdot\nabla v\mathrm{d}x \\
+	&=\int_{\Omega} \nabla u\cdot\nabla v\mathrm{d}x\triangleq a(u,v)
+\end{align*}
+
+记$V \triangleq \{v \big| v,Dv \in L^2(\Omega) , a(u,v) < + \inf , v|_{\partial\Omega} = 0\}$
+则问题\eqref{eq:P}的解可以有下列问题所描述:
+\begin{equation}\label{eq:W}
+	\text{求} u \in V, \text{使得}\quad f(u,v)=a(u,v) , \forall v \in V 
+\end{equation}
+上述\eqref{eq:W}称为\eqref{eq:P}的变分问题或弱形式
+
+下面我们考虑 Galerkin 方法来求 \eqref{eq:W} 的逼近解。由于电脑无法处理无限维空间，因此我们需要构造有限维空间 $V=\mathrm{span}\{\phi_0，\phi_1，\ldots，
+\phi_{N-1}\}$ 来逼近上面的无限维空间$H_0^1(\Omega)$。
+
+将真解$u$用逼近的空间$V$里的基函数表示
+
+\begin{equation}\label{eq:b}
+	\tilde u= \sum_{i=0}^{N-1}u_i \phi_i
+\end{equation}
+
+因此我们只需要求出其系数向量$\bfu = (u_0,u_1,\cdots,n_{N-1})$,其满足
+\begin{equation}
+	\label{eq:d}
+	a(\tilde u, v) = (f, v),
+	\quad\forall~v\in V.
+\end{equation}
+
+方程 \eqref{eq:d} 中仍然包含有无穷多个方程。 但 $V$ 是一个有限维空间，因此只需要对所有基函数满足 \eqref{eq:d} 即可
+$$
+\begin{cases}
+	a(\tilde u, \phi_0) = (f, \phi_0) \\
+	a(\tilde u, \phi_1) = (f, \phi_1) \\
+	\vdots \\
+	a(\tilde u, \phi_{N-1}) = (f, \phi_{N-1})
+\end{cases}
+$$
+将公式 \eqref{eq:b} 代入得到
+$$
+\begin{cases}
+	a(\sum_{i=0}^{N-1}u_i \phi_i, \phi_0) = (f, \phi_0) \\
+	a(\sum_{i=0}^{N-1}u_i \phi_i, \phi_1) = (f, \phi_1) \\
+	\vdots \\
+	a(\sum_{i=0}^{N-1}u_i \phi_i, \phi_{N-1}) = (f, \phi_{N-1})
+\end{cases}
+$$
+上面的方程可以改写为下面的形式:
+$$
+\begin{pmatrix}
+	a(\phi_0, \phi_0) & a(\phi_1, \phi_0) & \cdots & a(\phi_{N-1}, \phi_0) \\
+	a(\phi_0, \phi_1) & a(\phi_1, \phi_1) & \cdots & a(\phi_{N-1}, \phi_1) \\
+	\vdots & \vdots & \ddots & \vdots \\
+	a(\phi_0, \phi_{N-1}) & a(\phi_1, \phi_{N-1}) & \cdots & a(\phi_{N-1},
+	\phi_{N-1}) \\
+\end{pmatrix}
+\begin{pmatrix}
+	u_0 \\ u_1 \\ \vdots \\ u_{N-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+	(f, \phi_0) \\ (f, \phi_1) \\ \vdots \\ (f, \phi_{N-1})
+\end{pmatrix}
+$$
+上面的左端矩阵称为{\bf 刚度矩阵}(stiff matrix)，简记为 $\mathbf A$；右端向量
+称为 {\bf 载荷向量} (load vector), 简记为 $\mathbf f$。因此可将上面$N$个方程简记为
+$$
+\mathbf A\mathbf u = \mathbf f.
+$$
+
+求解得到系数向量$\bfu$代入 \eqref{eq:b} 的便得到解向量
+
+\section{动机}
+在通过$Galerkin$建立有限元空间中，很多学者提出了有限维空间V构造方法，相应的基函数也越来越丰富，但是分散在各种文献中，在有限元的相关教科书中也没有统一的说明，即使有整合在一起，其相应的理论和实现也没有具体给出，比如有限元周期表
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{figures/ptfe}
+	\caption{}
+	\label{fig:ptfe}
+\end{figure}
+一方面其不方便获取和理解，另一方面，大量不同的有限元类型，在编程实现方面存在冗余、复杂、结构混乱、接口不统一，对程序员不友好等情况。由于上述情况，本文一方面将一些常用的有限元构造给出系统的框架搭建，另一方面建立有限元的统一的结构，用一般化的方法来实对不同有限元的构造，使其更方便程序实现，也更易于用户理解。
+\section{本文的主要工作与结构安排} 
+
+在整个有限元过程中，第三步空间的构造最为重要，要找到适合的有限维空间来逼近原本的无限维空间，因此本文
+主整理出有限元中不同空间的构造方法，再通过数组化的方法表达出来，以便于编程上的实现，最后通过数值案例
+来验证空间构造的正确性。
+
+本文共分为五章，具体安排如下:
+\begin{itemize}
+	\item 第一章是引言，主要介绍有有限元方法的背景和过程，以及本文的工作安排
+	\item 第二章介绍网格基础知识，fealpy怎么实现
+	\item 第三章介绍两个基本多项式空间(重心坐标，拉格朗日，缩放单项式)（先把每一维度的单纯形说明白）
+	\item 第四章介绍混合元
+	\item 第五张介绍等参元
+	\item 介绍fealpy相关程序的使用方法
+	\item 数值案例
+	\item 本文的总结与展望
+\end{itemize}
+fealpy 空间构造  动机
+要做什么，各种高次有限元的构造，基本空间，各种有限元，对应fealpy的程序(函数，参数，变量)。数组化的方式呈现出来，
+
+第一节 要做什么
+第二节 以possion方程为例有限元方法，

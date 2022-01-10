@@ -1,0 +1,82 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\begin{document}
+\title{变分法学习}
+\author{王鹏祥}
+\date{2019.7.2}
+\maketitle
+\tableofcontents
+\newpage
+		\section{preface}
+		感觉变分法的学习应该与微分进行类比，其次再结合微分方程gerlkin那一章的一些知识来学习
+		\section{变分}\setlength{\parindent}{2em}
+		变分的学习应该与微分相互对比，这样才能更好的学到变分是啥。
+		
+	    首先微分是一个函数的概念，函数是数到数的一种映射关系y=y(x),所以微分是一个数值，一个变化很小的数值，自变量的微分定义为$\Delta x\rightarrow0$就记为dx，因变量的微分$\Delta y =y(x+\Delta x)-y(x) $然后$\Delta y\rightarrow0 $就记为dy。
+	    
+	   而变分是一个泛函的概念，泛函是函数到数的一种映射关系$\varPi=\varPi(y)$，所以这个时候自变量y是一个函数，我们把它叫做宗量。变分就是一个变化很小的函数，相当于在一个函数上做一个小扰动$ \delta y$,也就是说y与$y(x)+\delta y(x)$在定义域x内处处无限接近。泛函的变分也就是$ \delta\varPi=\varPi(y+\delta y)-\varPi(y)$
+  	   
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{1}
+	\caption{}
+	\label{fig:1}
+\end{figure}
+	    
+		接近度：就是两个函数到几阶导数的差值在定义域上处处很小，就是几阶接近度。
+
+		\section{变分命题}
+		变分命题的实质其实就是对泛函求极值问题，也就是求一条函数，使得某个目标最大化（最小化）。
+	
+	    其分为两类：
+	    
+	    第一类是边界已定的变分问题，其需要满足端点上的约束条件（Dirchlet，Neumann，Robbin）。其泛函可以写为$\varPi(y)=\int_{\alpha}^{\beta} F(x,y,y')$	    
+	    
+	    第二种是不仅要在边界上满足约束条件，在边界内同样有约束条件，同时还会有两个待定函数,其泛函可以写为$\varPi(y,z)=\int_{\alpha}^{\beta} F(x,y,y',z,z')$	
+	    
+		\section{变分法}
+	    求泛函极值的方法称为变分法
+	    
+	    \subsection{几个基本定理}
+	    
+	    \subsubsection{极值必要条件}
+	    跟函数的极值问题一样，函数极值的必要条件是，导数等于零。同样，泛函极值的必要条件也是泛函的变分等于0。
+	    
+	    既：若泛函$\varPi [y(x)] $在y=y(x)上达到极值，则它在y=y(x) y=y(x)上的变分 $\delta{J}$等于零。
+	    
+	     \subsubsection{变分法基本引理}
+	    \begin{equation}
+	    \begin{split}
+	    \int_{x_{1}}^{x_{2}} F(x) \delta y(x) \mathrm{d} x=0\\
+	    \forall \delta\in C^{\infty}_{0}(I)
+	    \end{split}
+	    \end{equation}
+	    也就是微分方程上讲的那个基本引理，$C^{\infty}_{0}(I)$为sobolev空间，这里就不多说了
+	    
+	   \subsubsection{第一类变分问题的变分}
+	   第一类变分问题为$\varPi(y)=\int_{\alpha}^{\beta} F(x,y,y')$，其中 F(x,y,y')被称为拉格朗日函数，其泛函的变分为
+	  \begin{equation}
+	  \begin{split}
+	  \delta \varPi=\int_{x_{0}}^{x_{1}}\left(F_{y} \delta y+F_{y} \delta y^{\prime}\right) d x=\int_{x_{0}}^{x_{1}}\left(F_{y} \delta y\right) d x+\left(F_{y^{\prime}} \delta_{y} | x_{0}^{x_{0}}-\int_{x_{0}}^{x_{1}}\left(\delta_{y} \frac{d}{d x} F_{y} d x\right)=\int_{x_{0}}^{x_{1}}\left(F_{y}-\frac{d}{d x} F_{y^{\prime}}\right) \delta y d x\right.
+	  \end{split}
+	  \end{equation}
+	    其实就跟微分方程在gelerkin上讲的变分一样
+	    
+	   \subsubsection{欧拉方程}
+	   由变分原理可得$F_{y}-\frac{d}{d x} F_{y^{\prime}}=0$
+	   再展开$\frac{d}{d x} F_{y^{\prime}}$得
+	   \begin{equation}
+	   \frac{\mathrm{d}}{\mathrm{d} x}\left(\frac{\partial F}{\partial y^{\prime}}\right)=\frac{\partial^{2} F}{\partial x \partial y^{\prime}}+\frac{\partial^{2} F}{\partial y \partial y^{\prime}} \frac{\mathrm{d} y}{\mathrm{d} x}+\frac{\partial^{2} F}{\partial y^{\prime 2}} \frac{\mathrm{d} y^{\prime}}{\mathrm{d} x}
+	   \end{equation}
+	   这就是欧拉方程，由此将变分问题转化为了微分方程的求解。
+       
+       
+       
+\section{一些问题和体会}\setlength{\parindent}{2em}
+对变分法还很蒙，大概知识知道了变分，变分问题是什么，具体如何求解变分问题还没有看明白，ppt还差最后一节没有看，书还没有看。感觉对一些东西还没有理解到位，下星期会着重研究变分问题得求解，并且对之前学的知识在进一步巩固，会找一些例题尝试自己重头到尾写一遍，比如最速降线，最短曲线之类的问题。
+
+\end{document} 

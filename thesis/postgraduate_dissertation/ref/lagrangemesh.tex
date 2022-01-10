@@ -1,0 +1,791 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\begin{document}
+\title{FEALPy 中的高阶网格}
+\author{魏华祎}
+\date{\chntoday}
+\maketitle
+
+\section{数学基础}
+设$\bfx$是曲面$\tau$上的一点,且曲面$\tau$有参数表示$\bfx(\xi,\eta) 
+= [x(\xi,\eta),y(\xi,\eta),z(\xi,\eta)]$,\\
+$\bfn$为曲面$\tau$的
+单位法向量
+$$
+\bfn = \frac{\bfx_{\xi} \times \bfx_{\eta}}{\| \bfx_{\xi} \times \bfx_{\eta} \|}
+$$
+\subsection{第一基本形式}
+\begin{definition}{第一基本形式}
+	曲面$\tau$的第一基本形式为二次微分式
+	$$
+	\uppercase\expandafter{\romannumeral1} = 
+	<d\bfx,d\bfx> = g_{00}d\xi d\xi + 2g_{01}d\xi d\eta + g_{11}d\eta d\eta 
+	$$
+	其中$d\bfx = x_{\xi}d\xi+x_{\eta}d\eta$,
+	$$
+	g_{00} = <x_{\xi},x_{\xi}>,
+	g_{01} = <x_{\xi},x_{\eta}>,
+	g_{11} = <x_{\eta},x_{\eta}>,
+	$$
+	称为第一基本形式的系数。
+\end{definition}
+
+\begin{property}
+曲面的第一基本形式是不依赖于曲面的具体参数化的。
+\end{property}
+
+\begin{property}
+曲面的第一基本形式在$\mcR^3$的合同变化下不变。
+\end{property}
+
+\subsection{第二基本形式}
+\begin{definition}{第二基本形式}
+曲面的第二基本式为二次微分式为
+$$
+\uppercase\expandafter{\romannumeral2} = 
+-<d\bfx,d\bfn> = b_{00}d\xi d\xi + 2b_{01}d\xi d\eta + b_{11}d\eta d\eta 
+$$
+其中$d\bfn = \bfn_{\xi} d\xi + \bfn_{\eta}d\eta$
+\begin{align*}
+b_{00} = <\bfx_{\xi \xi},\bfn> &= -<\bfx_{\xi},\bfn_{\xi}> \\
+b_{01} = <\bfx_{\xi \eta},\bfn> &= -<\bfx_{\xi},\bfn_{\eta}> = 
+- <\bfx_{\eta},\bfn_{\xi}> \\
+b_{11} = <\bfx_{\eta \eta},\bfn> &= -<\bfx_{\eta},\bfn_{\eta}> 
+\end{align*}
+称为第二基本形式的系数
+\end{definition}
+
+\begin{property}
+设$\bfx = \bfx(\xi,\eta)$和$\bfx = \bfx(\overline{\xi},
+\overline{\eta})$ 是曲面$\tau$的两个不同的参数表示，当变换
+$(\xi,\eta) \rightarrow (\overline{\xi},
+\overline{\eta})$的雅克比矩阵的行列式大于零，第二基本形式不遍;
+当变换
+$(\xi,\eta) \rightarrow (\overline{\xi},
+\overline{\eta})$的雅克比矩阵的行列式小于零，第二基本形式改变符号.
+\end{property}
+
+\begin{property}
+设$\tau$是曲面$R^3$的一张曲面，$\bfx(\xi,\eta)$是它的参数表述;$\mcT$是$R^3$
+的一个合同变换，则曲面$\widetilde{\tau}:\widetilde{\xi,\eta} = 
+\mcT \circ \bfx(\xi,\eta)$的第二基本形式
+$\widetilde{\uppercase\expandafter{\romannumeral2}}$与曲面$\tau$的
+第二基本形式有如下关系:当$\mcT$为刚体运动(合同变换分解的正交变换的矩阵的行列式为1)时$\widetilde{\uppercase\expandafter{\romannumeral2}}(\xi,\eta) = 
+\uppercase\expandafter{\romannumeral2}(\xi,\eta)$ ,当$\mcT$为反向刚
+体运动(合同变换分解的正交变换的矩阵的行列式为-1)时$\widetilde{\uppercase\expandafter{\romannumeral2}}(\xi,\eta) = 
+-\uppercase\expandafter{\romannumeral2}(\xi,\eta)$ .
+\end{property}
+
+\subsection{形函数}
+\begin{definition}{形函数}
+形函数定义于单元内部的、坐标的连续函数，它满足下列条件：
+\begin{itemize}
+\item 在节点i处，$\lambda_i =1$；在其他节点处，$\lambda_i = 0$；
+\item 能保证用它定义的未知量（u、v或x、y）在相邻单元之间的连续性；
+\item 应包含任意线性项，使用它定义的单元唯一可满足常应变条件；
+\item 应满足下列等式：$\sum \lambda_i(\bfx_i)= 1$。
+\end{itemize}
+\end{definition}
+
+\section{区间}
+
+给定 $p$ 次拉格朗日曲线 $l = [\bfx_0, \bfx_1, \cdots, \bfx_p]$, 共有 $p+1$ 个插值节点
+. 参考单元为 $[0, 1]$, 坐标变量记为 $\xi$. 曲线 $l$ 相对于参考单元的重心坐标函数
+是
+\begin{align*}
+    \lambda_0 = 1-\xi, \lambda_1 = \xi
+\end{align*}
+由此可构造 $p$ 次的拉格朗日形函数 
+\begin{align*}
+    \bphi_p = [\phi_0, \phi_1, \cdots, \phi_p]
+\end{align*}
+
+对于任意的 $\bfx \in l$, 存在 $\xi \in [0, 1]$
+\begin{align*}
+    \bfx(\xi) = \bfx_0 \phi_0(\xi) + \cdots + \bfx_p\phi_p(\xi)\\
+    \bfx_\xi = \bfx_0 (\phi_0)_\xi + \cdots + \bfx_p(\phi_p)_\xi
+\end{align*}
+
+在曲线 $l$ 上可定义 $q$ 次的拉格朗日多项式空间， 其基函数记为
+\begin{align*}
+    \bvarphi_q = [\varphi_0, \varphi_1, \cdots, \varphi_q]
+\end{align*}
+对应的插值点记为
+\begin{align*}
+    [\bfy_0, \bfy_1, \cdots, \bfy_q]
+\end{align*}
+其中 $\bfy_0 = \bfx_0$, $\bfy_q = \bfx_p$.
+
+对于任意的 $\bfx \in l$, 一一对应一个 $\xi \in [0, 1]$
+\begin{align*}
+    [\varphi_0(\bfx), \varphi_1(\bfx), \cdots, \varphi_q(\bfx)] = 
+    [\varphi_0(\xi), \varphi_1(\xi), \cdots, \varphi_q(\xi)] 
+\end{align*}
+
+下面考虑 $\varphi_i$ 关于 $\bfx \in l$ 的导数
+
+\begin{align*}
+    \nabla_\bfx \varphi_i = \bfx_\xi \bfG^{-1} (\varphi_i)_\xi
+\end{align*}
+其中，由于$\bfx_{\xi} \cdot \xi_{\bfx} = 1$,所以
+\begin{align*}
+	x_{\xi}\bfG^{-1} = \frac{1}{\xi_\bfx} \cdot <\xi_\bfx, \xi_\bfx> = \xi_\bfx
+\end{align*}
+
+其中 $\bfG = <\bfx_\xi, \bfx_\xi>$.
+
+
+
+
+
+\section{三角形网格}
+给定一个 $p$ 次的拉格朗日三角形 $\tau$, 它是由 $ldof = (p+1)(p+2)/2$ 个节点
+$\{\bfx_i\}_{i=0}^{ldof-1}$ 组成。
+
+\begin{figure}[H]
+\includegraphics[scale=0.7]{figures/ltri.png}
+\end{figure}
+
+
+设 $\{\phi_i\}_{i=0}^{ldof-1}$ 为对应的拉格朗日形函数，满足 
+$$
+\phi_i(\bfx_j) = \delta_{ij}
+$$
+给一个参考元(等腰直角三角形)
+\begin{align*}
+    \bfu = 
+    \begin{bmatrix}
+        \xi \\ \eta
+    \end{bmatrix}
+\end{align*}
+上的重心坐标为
+
+\begin{align*}
+    \lambda_0 &= 1 - \xi - \eta\\
+    \lambda_1 &= \xi\\
+    \lambda_2 &= \eta\\
+\end{align*}
+
+\begin{align*}
+    \nabla_\bfu \lambda_0 &= \begin{bmatrix}
+        -1 \\ -1
+    \end{bmatrix}\\
+    \nabla_\bfu \lambda_1 &= \begin{bmatrix}
+        1 \\ 0 
+    \end{bmatrix}\\
+    \nabla_\bfu \lambda_2 &= \begin{bmatrix}
+        0 \\ 1
+    \end{bmatrix}
+\end{align*}
+
+曲面 $\tau_h$ 上任意一点可表示为
+\begin{align*}
+    \bfx = \bfx_0 \phi_0 + \bfx_1\phi_1 + \cdots + \bfx_{ldof-1}\phi_{ldof-1}
+\end{align*}
+
+\begin{align*}
+    \nabla_\bfu \bfx = \bfx_0 \nabla_\bfu^T \phi_0 + \bfx_1\nabla_\bfu^T \phi_1
+    + \cdots + \bfx_{ldof-1}\nabla_\bfu^T\phi_{ldof-1}
+\end{align*}
+
+所以只需要求每个拉格朗日形函数 $\phi_i$ 关于 $\bfu$ 的导数。
+
+\begin{align*}
+    \nabla_\bfu \phi_i = 
+    \frac{\partial \phi_i}{\partial \lambda_0}\nabla_\bfu \lambda_0 + 
+    \frac{\partial \phi_i}{\partial \lambda_1}\nabla_\bfu \lambda_1 + 
+    \frac{\partial \phi_i}{\partial \lambda_2}\nabla_\bfu \lambda_2 
+\end{align*}
+
+
+
+下面讨论球面上的 $\tau$ 上任意一点可表示为
+\begin{align*}
+    \overline{\bfx} = \frac{\bfx}{\|\bfx\|}
+\end{align*}
+
+\begin{align*}
+    \nabla_\bfu \overline{\bfx} = \frac{\nabla_\bfu\bfx}{\|\bfx\|} +
+    \bfx\nabla_\bfu^T \|\bfx\|^{-1}
+\end{align*}
+
+\begin{align*}
+    \nabla_\bfu^T \|\bfx\|^{-1} = -\frac{\bfx^T[\bfx_\xi, \bfx_\eta]}{\|\bfx\|^3} 
+\end{align*}
+
+\begin{align*}
+    \nabla_\bfu \overline{\bfx} = \frac{\nabla_\bfu\bfx}{\|\bfx\|} - 
+    \frac{[\bfx_\xi, \bfx_\eta]}{\|\bfx\|^2} = \frac{\|\bfx\| -
+    1}{\|\bfx\|^2}\nabla_\bfu\bfx
+\end{align*}
+
+点 $\bfx=(x,y,z)$，则 $\|\bfx\|^{-1}=(x^2+y^2+z^2)^{-\frac{1}{2}}$.
+
+\begin{align*}
+    \frac{\partial \|\bfx\|^{-1}}{\partial \xi} &=
+    -\frac{1}{2}(x^2+y^2+z^2)^{-\frac{3}{2}}\left[2x x_\xi + 2y y_\xi +2z
+    z_\xi\right]\\
+                             &=  -\frac{1}{2}\|\bfx\|^{-3} 2\bfx \cdot \bfx_\xi\\
+                             &=  -\|\bfx\|^{-3} \bfx\cdot \bfx_\xi
+\end{align*}
+
+\begin{align*}
+    \frac{\partial \|\bfx\|^{-1}}{\partial \eta} &=
+    -\frac{1}{2}(x^2+y^2+z^2)^{-\frac{3}{2}}\left[2x x_\eta + 2y y_\eta +2z
+    z_\eta\right]\\
+                             &=  -\frac{1}{2}\|\bfx\|^{-3} 2\bfx\cdot\bfx_\eta\\
+                             &=  -\|\bfx\|^{-3} \bfx\cdot \bfx_\eta
+\end{align*}
+
+\begin{align*}
+    \nabla_\bfu \|\bfx\|^{-1} =    
+    \begin{bmatrix}
+     \nabla_\xi \|\bfx\|^{-1} \\ \nabla_\eta \|\bfx\|^{-1}
+    \end{bmatrix}
+                             =  -\|\bfx\|^{-3} \bfx 
+    \begin{bmatrix}
+      \bfx_\xi \\ \bfx_\eta
+    \end{bmatrix}
+    =-\frac{\bfx \nabla_\bfu \bfx}{\|\bfx\|^3}
+\end{align*}
+
+$\tau$ 上的第一基本形式为：
+\begin{align*}
+    \uppercase\expandafter{\romannumeral1} =  = 
+    \begin{bmatrix}
+        d\xi , d\eta
+    \end{bmatrix}
+     \begin{bmatrix}
+        g_{00} & g_{01} \\
+        g_{10} & g_{11} 
+    \end{bmatrix}   
+    \begin{bmatrix}
+        d\xi \\ d\eta
+    \end{bmatrix}
+\end{align*}
+
+即
+
+$$
+\uppercase\expandafter{\romannumeral1} 
+= \langle d\bfx, d\bfx \rangle = g_{00} d\xi d\xi+  2g_{01} d\xi d\eta  + g_{11} d\eta d\eta 
+$$
+
+其中
+
+\begin{align*}
+	d\bfx = & \bfx_u du +\bfx_v dv,\\
+    \bfG = & 
+    \begin{bmatrix}
+        g_{00} & g_{01} \\
+        g_{10} & g_{11} 
+    \end{bmatrix}\\
+    g_{00} = & <\bfx_\xi, \bfx_\xi> \\
+    g_{01} = & <\bfx_\xi, \bfx_\eta> = g_{10}\\
+    g_{11} = & <\bfx_\eta, \bfx_\eta> 
+\end{align*}
+
+$\tau$ 上的第二基本形式为：
+\begin{align*}
+    \uppercase\expandafter{\romannumeral2} =
+    \begin{bmatrix}
+        d\xi , d\eta
+    \end{bmatrix}
+     \begin{bmatrix}
+        b_{00} & b_{01} \\
+        b_{10} & b_{11} 
+    \end{bmatrix}   
+    \begin{bmatrix}
+        d\xi \\ d\eta
+    \end{bmatrix}
+\end{align*}
+
+即
+
+$$
+\uppercase\expandafter{\romannumeral1} = -\langle d\bfx, d\bfn \rangle = b_{00} d\xi d\xi+  2b_{01} d\xi d\eta  +
+b_{11} d\eta d\eta 
+$$
+
+其中
+
+\begin{align*}
+	d\bfx = & \bfx_\xi d\xi +\bfx_\eta d\eta, \\
+	d\bfn = & \bfn_\xi d\xi + \bfn_\eta d\eta \\
+    \bfB = & 
+    \begin{bmatrix}
+        b_{00} & b_{01} \\
+        b_{10} & b_{11} 
+    \end{bmatrix}\\
+	b_{00} = & <\bfx_{\xi \xi},\bfn> = -<\bfx_\xi,\bfn_\xi> \\
+	b_{01} = & <\bfx_{\xi \eta},\bfn> = -<\bfx_\xi,\bfn_\eta> = - <\bfx_\eta,\bfn_\xi> =b_{10}\\
+	b_{11} = & <\bfx_{\eta \eta},\bfn> = -<\bfx_\eta,\bfn_\eta> 
+\end{align*}
+
+$\tau$ 上的切梯度算子：
+
+\begin{align*}
+    \nabla_\tau \phi_i = 
+    \nabla_\bfu \bfx \bfG^{-1} \nabla_\bfu \phi_i =
+    [\bfx_\xi, \bfx_\eta] \bfG^{-1} \nabla_\bfu \phi_i
+\end{align*}
+
+$\tau$ 上的单位法向量为:
+
+$$
+\bfn = \frac{\bfx_{\xi} \times \bfx_{\eta}}{\|\bfx_{\xi} \times \bfx_{\eta}\|}
+$$
+
+$\tau$ 上的面积为:
+\begin{align*}
+    |\tau| = \int_\tau 1 \rmd\bfx = \int_{\bar\tau} |\bfx_\xi \times \bfx_\eta| \rmd\bfu
+\end{align*}
+
+其中
+\begin{align*}
+|\bfx_\xi \times \bfx_\eta|^2 = |\bfx_\eta|^2 |\bfx_\xi|^2 \cos^2 \theta  = |\bfx_\eta|^2 |\bfx_\xi|^2 -|\bfx_\xi|^2 |\bfx_{\eta}|^2 
+\sin^2 \theta = | \bfG |
+\end{align*}
+
+在三角形 $\tau$ 上可定义 $q$ 次的拉格朗日多项式空间， 其基函数记为
+\begin{align*}
+    \bvarphi_q = [\varphi_0, \varphi_1, \cdots, \varphi_q]
+\end{align*}
+对应的插值点记为
+\begin{align*}
+    [\bfy_0, \bfy_1, \cdots, \bfy_q]
+\end{align*}
+
+对于任意的 $\bfx \in \tau$, 一一对应一対参考单元的 $(\xi , \eta) $
+\begin{align*}
+    [\varphi_0(\bfx), \varphi_1(\bfx), \cdots, \varphi_q(\bfx)] = 
+    [\varphi_0(\xi,\eta), \varphi_1(\xi,\eta), \cdots, \varphi_q(\xi,\eta)] 
+\end{align*}
+
+ $\varphi_i$ 关于 $\bfx \in \tau$ 的导数
+
+\begin{align*}
+    \nabla_\bfx \varphi_i = [\bfx_\xi, \bfx_\eta] \bfG^{-1} \nabla_\bfu \varphi_i
+\end{align*}
+
+\begin{align*}
+    \nabla^2_\bfx \varphi_i = \nabla^2_u \bfx (\bfG^{-1})^2 \nabla_u \varphi_i + \nabla_u \bfx (\bfG^{-1})^2 \nabla_{uu}\varphi_i \nabla_u \bfx
+\end{align*}
+
+\section{四边形}
+
+给定一个 $p$ 次的拉格朗日四边形 $\tau$, 它由 $ldof = (p+1)^2 $ 个节点$\{\bfx_i\}_{i=0}^{ldof-1}$ 组成,它是由两个一维单纯形张成的。
+
+设第一个曲线 $l_1$ 的坐标变量为 $ \xi $,其相对于参考单元的重心坐标函数是
+$$
+\lambda_0 = 1- \xi , \lambda_1 = \xi
+$$
+
+由此构造其p次lagrange形函数$\{\phi_i\}_{i=0}^{p}$，其上的插值点为$\{y_i\}_{i=0}^{p}$
+\begin{align*}
+\phi_i(\bfy_j) &= \delta_{ij} \\
+\Phi &= \{ \phi_0 , \phi_1 , \cdots ,\phi_p \}
+\end{align*}
+
+设另一个曲线 $l_2$ 的坐标变量为 $ \eta $,其相对于参考单元的重心坐标函数是
+$$
+\lambda_2 = 1- \eta , \lambda_3 = \eta
+$$
+
+由此构造其p次lagrange形函数$\{\psi_i\}_{i=0}^{p}$,其上的插值点为$\{z_i\}_{i=0}^{p}$
+\begin{align*}
+\psi_i(\bfz_j) &= \delta_{ij} \\
+\Psi &= \{ \psi_0 , \psi_1 , \cdots ,\psi_p \}
+\end{align*}
+
+
+
+那么四边形的参考单元为
+$$
+ \bfu = \begin{bmatrix}
+        	\xi \\ \eta
+ 		\end{bmatrix}
+$$
+
+重心坐标函数是
+
+\begin{align*}
+	\begin{bmatrix}
+		\Lambda_0 & \Lambda_1 \\
+		\Lambda_2 & \Lambda_3
+	\end{bmatrix}
+	=
+     \begin{bmatrix}
+       \lambda_0  \\ \lambda_1
+    \end{bmatrix}
+  	\cdot
+    \begin{bmatrix}
+        \lambda_2 & \lambda_3
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \lambda_0 \lambda_2 & \lambda_0 \lambda_3 \\
+        \lambda_1 \lambda_2 & \lambda_1 \lambda_3
+    \end{bmatrix}
+    =
+	\begin{bmatrix}
+    	(1 - \xi )(1 - \eta ) & (1 - \xi ) \eta \\
+    	\xi (1 - \eta)       & \xi \eta	
+    \end{bmatrix}   
+\end{align*}
+
+\begin{align*}
+    \nabla_{\bfu} \Lambda_0 &= \begin{bmatrix}
+    								\eta-1 \\ \xi-1
+								\end{bmatrix} \\
+    \nabla_{\bfu} \Lambda_1 &= \begin{bmatrix}
+    								-\eta \\ 1-\xi
+								\end{bmatrix} \\
+    \nabla_{\bfu} \Lambda_2 &= \begin{bmatrix}
+    								1-\eta \\ -\xi
+								\end{bmatrix} \\
+    \nabla_{\bfu} \Lambda_2 &= \begin{bmatrix}
+    								\eta \\  \xi
+								\end{bmatrix}
+\end{align*}
+
+形函数是
+\begin{align*}
+ \alpha = \Phi \otimes \Psi = 
+  \begin{bmatrix}
+   \phi_0 \psi_0 & \phi_0 \psi_1  & \cdots & \phi_0 \psi_p \\ 
+   \vdots        &   \ddots       &        &  \vdots       \\
+   \phi_p \psi_0 &  \phi_p \psi_1 &  \cdots&  \phi_p\psi_p  
+  \end{bmatrix}
+  :=
+  \begin{bmatrix}
+   \alpha_{00}   & \alpha_{01}    & \cdots & \alpha_{0p} \\ 
+   \vdots        &   \ddots       &        &  \vdots       \\
+   \alpha_{p0}   &  \alpha_{p1}   &  \cdots&  \alpha_{pp}  
+  \end{bmatrix}
+\end{align*}
+
+那么四边形上任意一点可以表示为
+
+$$
+x = \sum \alpha_{ij}x_{ij} 
+$$
+
+其导数为
+\begin{align*}
+   \alpha_\xi = \Phi_\xi \otimes \Psi = 
+   \begin{bmatrix}
+   (\phi_0)_\xi \psi_0 & (\phi_0)_\xi \psi_1  & \cdots & (\phi_0)_\xi \psi_p \\ 
+   \vdots        &   \ddots       &        &  \vdots       \\
+   (\phi_p)_\xi \psi_0 &  (\phi_p)_\xi \psi_1 &  \cdots&  (\phi_p)_\xi\psi_p  
+   \end{bmatrix} \\
+   \alpha_\eta = \Phi_ \otimes \Psi_\eta = 
+   \begin{bmatrix}
+   \phi_0 (\psi_0)_\eta & \phi_0 (\psi_1)_\eta  & \cdots & \phi_0 (\psi_p)_\eta \\ 
+   \vdots        &   \ddots       &        &  \vdots       \\
+   \phi_p (\psi_0)_\eta &  \phi_p (\psi_1)_\eta &  \cdots&  \phi_p (\psi_p)_\eta
+   \end{bmatrix} 
+\end{align*}
+
+
+\section{四面体网格}
+给定一个 $p$ 次的拉格郎日四面体 $\tau$,它由 $ldof = (p+1)(p+2)(p+3)/6$ 个节点组
+成。设 $\{\phi\}_{i=0}^{ldof-1}$ 为对应的拉格郎日形函数，满足
+$$
+\phi_i(\bfx_j) = \delta_{ij}
+$$
+
+\begin{align*}
+    \bfu = 
+    \begin{bmatrix}
+        \xi \\ \eta \\ \zeta
+    \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+    \lambda_0 &= 1-\xi-\eta-\zeta \\
+    \lambda_1 &= \xi \\
+    \lambda_2 &= \eta \\
+    \lambda_3 &= \zeta \\
+\end{align*}
+
+\begin{align*}
+    \nabla_\bfu\lambda_0  & = 
+    \begin{bmatrix}
+        -1 \\ -1 \\ -1
+    \end{bmatrix}\\
+    \nabla_\bfu\lambda_1 & = 
+    \begin{bmatrix}
+        1 \\ 0 \\0
+    \end{bmatrix}\\
+    \nabla_\bfu\lambda_2 & = 
+    \begin{bmatrix}
+        0 \\ 1 \\ 0
+    \end{bmatrix}\\
+    \nabla_\bfu\lambda_3 & = 
+    \begin{bmatrix}
+        0 \\ 0 \\ 1
+    \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+    \bfx = \bfx_0\phi_0 +\bfx_1\phi_1+\cdots+\bfx_{ldof-1}\phi_{ldof-1}
+\end{align*}
+
+\begin{align*}
+    \nabla_{\bfu}\bfx = \bfx_0\nabla_{\bfu}^T\phi_0+\bfx_1\nabla_{\bfu}^T\phi_1
+     + \cdots+\bfx_{ldof-1}\nabla_{\bfu}^T\phi_{ldof-1}
+\end{align*}
+
+所以只需要求每个拉格朗日形函数 $\phi_i$ 关于 $\bfu$ 的导数。
+\begin{align*}
+    \nabla_{\bfu}\phi_i =
+    \frac{\partial\phi_i}{\partial\lambda_0}\nabla_{\bfu}\lambda_0 + 
+    \frac{\partial\phi_i}{\partial\lambda_1}\nabla_{\bfu}\lambda_1 +
+    \frac{\partial\phi_i}{\partial\lambda_2}\nabla_{\bfu}\lambda_2 +
+    \frac{\partial\phi_i}{\partial\lambda_3}\nabla_{\bfu}\lambda_3 
+\end{align*}
+
+$\tau$ 上的第一基本形式为：
+
+
+\begin{align*}
+	I = & \bfv\bfG\bfv^T \\
+	\bfv = & 
+	\begin{bmatrix}
+	d\xi & d\eta & d\zeta
+	\end{bmatrix}	\\
+    \bfG = & 
+    \begin{bmatrix}
+        g_{00} & g_{01} & g_{02} \\
+        g_{10} & g_{11} & g_{12} \\
+        g_{20} & g_{21} & g_{22}
+    \end{bmatrix}\\
+    g_{00} = & <\bfx_\xi, \bfx_\xi> \\
+    g_{01} = & <\bfx_\xi, \bfx_\eta> \\
+    g_{02} = & <\bfx_\xi, \bfx_\zeta> \\
+    g_{10} = & <\bfx_\eta,\bfx_\xi> \\
+    g_{11} = & <\bfx_\eta,\bfx_\eta> \\
+    g_{12} = & <\bfx_\eta,\bfx_\zeta> \\
+    g_{20} = & <\bfx_\zeta,\bfx_\xi> \\
+    g_{21} = & <\bfx_\zeta,\bfx_\eta> \\
+    g_{22} = & <\bfx_\zeta,\bfx_\zeta>
+\end{align*}
+
+$\tau$ 上的切梯度算子：
+
+\begin{align*}
+    \nabla_\tau \phi_i = 
+    \nabla_\bfu \bfx \bfG^{-1} \nabla_\bfu \phi_i =
+    [\bfx_\xi, \bfx_\eta] \bfG^{-1} \nabla_\bfu \phi_i
+\end{align*}
+
+$\tau$ 上的体积为:
+\begin{align*}
+    |\tau| = \int_{\tau}1d\bfx =
+    \int_{\overline{\tau}}|\bfx_{\xi}\times\bfx_{\eta}\cdot\bfx_{\zeta}|d\bfu
+\end{align*}
+\section{六面体}
+给定一个 $p$ 次的拉格朗日六面体 $\tau$, 它由 $ldof = (p+1)^3 $ 个节点
+$\{\bfx_i\}_{i=0}^{ldof-1}$ 组成。
+
+设 $\{\phi_i\}_{i=0}^{ldof-1}$ 为对应的拉格朗日形函数，满足 
+$$
+\phi_i(\bfx_j) = \delta_{ij}
+$$
+
+\begin{align*}
+    \bfu_0 = 
+    \begin{bmatrix}
+        \xi \\ 0 \\0
+    \end{bmatrix} ,
+    \bfu_1 = 
+    \begin{bmatrix}
+        0 \\ \eta \\ 0
+    \end{bmatrix} ，
+    \bfu_2 = 
+    \begin{bmatrix}
+        0 \\ 0 \\ \zeta
+    \end{bmatrix}
+\end{align*}
+
+
+\begin{align*}
+    \lambda_0 &=  \xi \\
+    \lambda_1 &= 1 - \xi\\
+    \lambda_2 &= \eta\\
+    \lambda_3 &= 1 - \eta\\   
+    \lambda_4 &= \zeta\\
+    \lambda_5 &= 1 - \zeta\\  
+\end{align*}
+
+\begin{align*}
+     \begin{bmatrix}
+       \lambda_0 , \lambda_1 
+    \end{bmatrix}
+  	\otimes
+    \begin{bmatrix}
+        \lambda_2 , \lambda_3
+    \end{bmatrix}
+    \otimes
+    \begin{bmatrix}
+        \lambda_4 , \lambda_5
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \qquad \qquad \qquad \qquad  \lambda_5\lambda_0\lambda_2 , \lambda_5\lambda_0\lambda_3 \\ 
+        \qquad \qquad \qquad \qquad  \lambda_5\lambda_1\lambda_2 ,  \lambda_5\lambda_1\lambda_3 \\   
+        \lambda_4\lambda_0\lambda2 , \lambda_4\lambda_0\lambda_3 \qquad \qquad \qquad \qquad \\
+         \lambda_4\lambda_1\lambda2 , \lambda_4\lambda_1\lambda_3 \qquad \qquad \qquad \qquad \\
+    \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+    \nabla_{\bfu_0} \lambda_0 &= \begin{bmatrix}
+        1 \\ 0 \\ 0
+    \end{bmatrix}\\
+    \nabla_{\bfu_0} \lambda_1 &= \begin{bmatrix}
+        -1 \\ 0 \\ 0 
+    \end{bmatrix}\\
+    \nabla_{\bfu_1} \lambda_2 &= \begin{bmatrix}
+        0 \\ 1 \\0 
+    \end{bmatrix} \\
+     \nabla_{\bfu_1} \lambda_3 &= \begin{bmatrix}
+        0 \\ -1 \\ 0
+    \end{bmatrix}\\
+     \nabla_{\bfu_2} \lambda_4 &= \begin{bmatrix}
+        0 \\ 0 \\ 1 
+    \end{bmatrix} \\
+     \nabla_{\bfu_1} \lambda_5 &= \begin{bmatrix}
+        0 \\ 0 \\ -1
+    \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+    \bfx = \bfx_0 \phi_0 + \bfx_1\phi_1 + \cdots + \bfx_{ldof-1}\phi_{ldof-1}
+\end{align*}
+
+
+
+所以只需要求每个拉格朗日形函数 $\phi_i$ 关于 $\bfu$ 的导数。
+
+\begin{align*}
+    \nabla_\bfu \phi_i = 
+    \frac{\partial \phi_i}{\partial \lambda_0}\nabla_\bfu \lambda_0 + 
+    \frac{\partial \phi_i}{\partial \lambda_1}\nabla_\bfu \lambda_1 + 
+    \frac{\partial \phi_i}{\partial \lambda_2}\nabla_\bfu \lambda_2 +
+    \frac{\partial \phi_i}{\partial \lambda_3}\nabla_\bfu \lambda_3 +
+    \frac{\partial \phi_i}{\partial \lambda_4}\nabla_\bfu \lambda_4 +
+    \frac{\partial \phi_i}{\partial \lambda_5}\nabla_\bfu \lambda_5 
+\end{align*}
+
+
+\begin{align*}
+    |\tau| = \int_{\tau}1d\bfx =
+    \int_{\overline{\tau}}|\bfx_{\xi}\times\bfx_{\eta}\cdot\bfx_{\zeta}|d\bfu
+\end{align*}
+
+
+$\tau$ 上的第一基本形式为：
+
+\begin{align*}
+	I = & \bfv\bfG\bfv^T \\
+	\bfv = & 
+	\begin{bmatrix}
+	d\xi & d\eta & d\zeta
+	\end{bmatrix}	\\
+    \bfG = & 
+    \begin{bmatrix}
+        g_{00} & g_{01} & g_{02} \\
+        g_{10} & g_{11} & g_{12} \\
+        g_{20} & g_{21} & g_{22}
+    \end{bmatrix}\\
+    g_{00} = & <\bfx_\xi, \bfx_\xi> \\
+    g_{01} = & <\bfx_\xi, \bfx_\eta> \\
+    g_{02} = & <\bfx_\xi, \bfx_\zeta> \\
+    g_{10} = & <\bfx_\eta,\bfx_\xi> \\
+    g_{11} = & <\bfx_\eta,\bfx_\eta> \\
+    g_{12} = & <\bfx_\eta,\bfx_\zeta> \\
+    g_{20} = & <\bfx_\zeta,\bfx_\xi> \\
+    g_{21} = & <\bfx_\zeta,\bfx_\eta> \\
+    g_{22} = & <\bfx_\zeta,\bfx_\zeta>
+\end{align*}
+
+$\tau$ 上的第二基本形式为：
+
+\begin{align*}
+    \nabla_\tau \phi_i = 
+    \nabla_\bfu \bfx \bfG^{-1} \nabla_\bfu \phi_i =
+    [\bfx_\xi, \bfx_\eta, \bfx_\zeta] \bfG^{-1} \nabla_\bfu \phi_i
+\end{align*}
+\cite{fealpy}
+
+\newpage
+
+\section{高次的多边形网格}
+
+
+在坐标变量为 $\bfu = (\xi, \eta)$ 的平面坐标系中， 引入一个中心在坐标原
+点正 $N$ 边形做为参考单元 $\bar K$, 它共有 $N$ 条曲边, 第 $i$ 条边 $\bar e_i = (\bfu_i^0,
+\bfu_i^1, \cdots, \bfu_i^p)$, $0\leq i < N$. 组成 $\bar e_i$ 的点 $\bfu_i^j$ 是
+等距分布的．
+
+在 $\bar K$ 上定义 $p$ 次的单项式空间的基函数　
+$$
+\bar\bfm_p =
+\begin{bmatrix} 
+    \bar m_0 & \bar m_1 & \cdots & \bar m_{n_p-1}
+\end{bmatrix} 
+= 
+\begin{bmatrix} 
+    1 & \xi & \eta & \cdots & \xi\eta^{p-1} & \eta^p
+\end{bmatrix}
+$$
+其中 $n_p = (p+1)(p+2)/2$. 
+
+接着可以在 $\bar K$ 定义标准协调的虚单元空间, 其基函数记为
+$$
+\bphi_p(\xi, \eta) = 
+\begin{bmatrix} 
+    \bphi_p^{\bar V} & \bphi_p^{\bar E} & \bphi_p^{\bar K}
+\end{bmatrix} 
+= 
+\begin{bmatrix} 
+    \phi_{p, 0} & \phi_{p, 1} & \cdots & \phi_{p, N_K-1}
+\end{bmatrix}
+$$
+其中 $\bphi_p^{\bar V}$ 是定义在 $\bar K$ 的顶点处的基函数, $\bphi_p^{\bar E}$ 是定义在
+$\bphi_p^{\bar K}$ 是定义在 $\bar K$ 内部的基函数. $\bar K$ 顶点和边内部点处的基
+函数是插值型的基函数, 在相应插值点处的取值为 1, 其它插值点为 0. $\bar K$ 内部的基函
+数是积分型的基函数, 共有 $n_{p-2} = (p-1)p/2$ 个, 在 $\bar K$ 边界上的插值点取值
+为 0.
+
+可以在给定曲面 $S$ 上, 构造的一个局部逼近曲面 $S$ 的曲多边形单元 $K_p$, 设其有 $N$ 条曲边, 每条边 $e_i$ 取 $p+1$ 点
+$\{\bfx_i^0, \bfx_i^1, \cdots, \bfx_i^p\}\subset S$，其中 $\bfx_i^0$ 和 $\bfx_i^p$
+是 $K_p$ 逆时针相邻的两个顶点(角点), $0\leq i < N$．对于任意的 $\bfx_p \in K_p$,  可以找到一个 $\bfu \in \bar K$, 使得:
+$$
+\bfx_p = \bfx_0\phi_{p, 0} + \cdots + \bfx_{N_K-1}\phi_{p, N_K-1} \in K_p,
+$$
+满足如下性质 
+$$
+\min \|\bfx_p - a(\bfx)\|_{\bar K}
+$$
+其中 $a(\bfx)$ 是曲面 $S$ 离 $\bfx_p$ 最近的点. 注意到这个极小化问题中, 只有单元内
+部基函数的系数需要确定. 下面的问题是如何有效计算这个极小化问题?
+
+
+当然, 如果限定为三角形单元, 完全可可以借助拉格朗日形函数来获得一个逼近曲面的曲面
+三角 形单元, 然后在这个曲面三角形上构造 VEM 的空间, 对应的多项式一种可能是定义在
+参考三角形上, 也即关于参考单元的 $(\xi, \eta)$ 是多项式, 关于实际空间的 $\bfx$
+坐标不是多项式.
+
+
+
+
+
+
+\bibliographystyle{abbrv}
+\bibliography{lagrangemesh}
+\end{document}

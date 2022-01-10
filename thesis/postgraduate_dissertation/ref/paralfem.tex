@@ -1,0 +1,603 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{beamer}
+
+\usetheme{Darmstadt}
+\useinnertheme{rounded}
+
+\usecolortheme{beaver}
+%\usecolortheme{albatross}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+%\usecolortheme{default}
+
+
+\setbeamerfont*{frametitle}{size=\normalsize,series=\bfseries}
+\setbeamertemplate{navigation symbols}{}
+
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+
+\usepackage{biblatex}
+\addbibresource{ref.bib}
+
+\usefonttheme[onlymath]{serif}
+\numberwithin{subsection}{section}
+%\usefonttheme[onlylarge]{structurebold}
+\setbeamercovered{transparent}
+
+\title{FEALPy 偏微分方程数值解程序设计与实现: 
+    {\bf 参数拉格朗日有限元空间的构造}}
+\author{魏华祎}
+\institute[XTU]{
+weihuayi@xtu.edu.cn\\
+\vspace{5pt}
+湘潭大学$\bullet$数学与计算科学学院\\
+}
+ 
+\date[XTU]
+{
+    \today
+}
+
+
+\AtBeginSection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsection] 
+  }
+}
+
+\AtBeginSubsection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsubsection] 
+  }
+}
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{关于重心坐标的导数}
+
+\begin{frame}
+    \frametitle{关于重心坐标的导数}
+    考虑下面的函数序列
+    $$
+        g_i(\lambda) := \prod_{j=0}^{i-1}(p\lambda - j), i=0, 1, \cdots, p.
+    $$
+    其中 $g_0(\lambda) = 1$. 易知该函数序列有如下关系式成立
+    $$
+        g_i(\lambda) = (p\lambda - i + 1)g_{i-1}(\lambda),
+    $$
+    下面推导 $g_i$ 关于 $\lambda$ 的任意阶导数的计算公式.
+\end{frame}
+
+\begin{frame}
+    \frametitle{各阶导数的计算公式}
+    \begin{align*}
+        \frac{\rmd g_i}{\rmd \lambda} =& (p\lambda - i + 1)\frac{\rmd g_{i-1}}{\rmd \lambda} + pg_{i-1}(\lambda) \\
+        \frac{\rmd^2 g_i}{\rmd \lambda^2} =&
+        (p\lambda - i + 1)\frac{\rmd^2 g_{i-1}}{\rmd \lambda^2} +
+        2p\frac{\rmd g_{i-1}}{\rmd \lambda}\\ 
+        \frac{\rmd^3 g_i}{\rmd \lambda^3} =&
+        (p\lambda - i + 1)\frac{\rmd^3 g_{i-1}}{\rmd \lambda^3} +
+        3p\frac{\rmd^2 g_{i-1}}{\rmd \lambda^2}\\ 
+        \vdots & \\
+        \frac{\rmd^p g_i}{\rmd \lambda^p} =&
+        (p\lambda - i + 1)\frac{\rmd^p g_{i-1}}{\rmd \lambda^p} +
+        p^2\frac{\rmd^p g_{i-1}}{\rmd \lambda^p}\\ 
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{导数的数组化计算公式}
+    记
+    $$
+        \bfG = 
+        \begin{bmatrix}
+            g_0(\lambda) \\ g_1(\lambda) \\ \vdots \\ g_{p-1}(\lambda)
+        \end{bmatrix}
+    $$
+    \begin{equation*}
+        \frac{\rmd \bfG}{\rmd \lambda} = 
+        \begin{bmatrix}
+             \frac{\rmd g_0}{\rmd \lambda}    \\ 
+             \frac{\rmd g_1}{\rmd \lambda}    \\ 
+             \vdots \\ 
+             \frac{\rmd g_{p-1}}{\rmd \lambda}
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+             0    \\ 
+             (p\lambda - 0)\frac{\rmd g_{0}}{\rmd \lambda} + pg_{0}(\lambda)   \\ 
+             (p\lambda - 1)\frac{\rmd g_{1}}{\rmd \lambda} + pg_{1}(\lambda)   \\ 
+             \vdots \\ 
+             (p\lambda - p + 2)\frac{\rmd g_{p-2}}{\rmd \lambda} + pg_{p-2}(\lambda)   \\ 
+        \end{bmatrix}
+    \end{equation*}
+\end{frame}
+
+
+\section{区间}
+\begin{frame}
+    \frametitle{参考区间单元}
+    给定一个区间 $[0,1]$, 其所在坐标变量记为 $\xi$ 称这个区间为{\bf 参考区间单
+    元}, 简称为{\bf 参考单元}.  易知, 参考单元重心坐标为
+    \begin{align*}
+        \lambda_0 &= 1 - \xi\\
+        \lambda_1 &= \xi\\
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{任意次拉格朗日形函数}
+
+    给定{\bf 非负多重整数}指标向量 $\bfm_\alpha = (m_0, m_1)$, 在参考单元上可以构造如下的 $p$ 次多项式函数:
+    \begin{equation}
+        \phi_{\alpha} = \frac{1}{\bfm_\alpha!}\prod_{i=0}^{1}\prod_{j_i =
+        0}^{m_i - 1} (p\lambda_i - j_i).
+        \label{eq:phi}
+    \end{equation}
+    其中
+    \begin{align*}
+        &m_0 + m_1 = p,\quad \bfm_\alpha! = m_0!m_1!, \\
+        &\prod_{j_i=0}^{-1}(p\lambda_i - j_i) = 1,\quad i = 0, 1.
+    \end{align*}
+    \begin{remark}
+        $\phi_{\alpha}$ 可以看成 $\xi$ 的函数, 也可以看成 $\blambda
+        = (\lambda_0, \lambda_1)$ 的函数. 易知, 这样的函数可以定义
+        $p+1$ 个.
+    \end{remark}
+\end{frame}
+
+\begin{frame}
+    对于每个形函数 $\phi_\alpha$ 对应的 {\bf 非负多重整数}指标向量 $\bfm_\alpha
+    = (m_0, m_1)$, 都可定义唯一的重心坐标
+    $$
+        \blambda_\alpha = (\frac{m_0}{p}, \frac{m_1}{p}).
+    $$
+    满足
+    \begin{equation*}
+        \phi_\alpha(\blambda_\alpha) = 1.
+    \end{equation*}
+    给定一个不同的{\bf 非负多重整数}指标向量 $\bfm_\beta$, 有
+    \begin{equation*}
+        \phi_\alpha(\blambda_\beta) = 0.
+    \end{equation*}
+\end{frame} 
+
+\begin{frame}
+    \frametitle{高次拉格朗日区间单元}
+    在参考单元上定义 $p+1$ 个 $p$ 次的拉格朗日形函数, 写成向量函数形式
+    $$
+        \bphi = [\phi_0, \phi_1, \cdots, \phi_p],
+    $$
+
+    给定 $\mbR$ 中的 $p$ 次拉格朗日曲线 $l$ 的 $p+1$ 个节点
+    $\{\bfx_i\}_{i=0}^{p}$, 则可以建立起从参考单元到 $l$ 的一个一一映射:
+    \begin{equation*}
+        \bfx = \sum_{i=0}^{p}\bfx_i\phi_i.
+    \end{equation*}
+    则
+    \begin{align*}
+        \bfx_\xi = \sum_{i=0}^{p}\bfx_i(\phi_i)_\xi.
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{高次拉格朗日多项式空间}
+    在曲线 $l$ 上定义 $q$ 次拉格朗日多项式空间, 基函数记为
+    $$
+        \bvarphi_q = [\varphi_0, \varphi_1, \cdots, \varphi_q],
+    $$
+    对应的插值点记为
+    $$
+        [\bfy_0, \bfy_1, \cdots, \bfy_q],
+    $$
+    其中, $\bfy_0=\bfx_0, \bfy_q=\bfx_p$.
+\end{frame}
+
+\begin{frame}
+    对任意的 $\bfx \in l$, 一一对应一个 $\xi \in [0, 1]$
+    $$
+        [\varphi_0(\bfx), \varphi_1(\bfx), \cdots, \varphi_q(\bfx)] = 
+        [\varphi_0(\xi), \varphi_1(\xi), \cdots, \varphi_q(\xi)].
+    $$
+
+    考虑 $\varphi_i$ 关于 $\bfx \in l$ 的导数
+    \begin{equation*}
+        \nabla_x \varphi_i = \bfx_\xi \bfG^{-1}(\varphi_i)_\xi.
+    \end{equation*}
+    \begin{remark}
+        $$
+            \bfx_\xi \bfG^{-1} = \frac{1}{\xi_\bfx} \cdot <\xi_\bfx, \xi_\bfx> 
+            =\xi_\bfx,
+        $$
+        其中 $\bfG = <\bfx_\xi, \bfx_\xi>$.
+    \end{remark}
+\end{frame}
+
+
+
+
+\section{三角形}
+
+\begin{frame}
+    \frametitle{参考三角形单元}
+    给定一个三角形 $K$, 三个顶点分别为 (0, 0), (1, 0), (0, 1), 其所在坐标
+    系的变量记为
+    $$
+        \bfu = \begin{bmatrix}
+            \xi \\ \eta
+        \end{bmatrix}
+    $$
+    称 $K$ 为{\bf 参考三角形单元}, 简称为{\bf 参考单元}.  易知, $K$ 上的重心坐标为
+    \begin{align*}
+        \lambda_0 &= 1 - \xi - \eta\\
+        \lambda_1 &= \xi\\
+        \lambda_2 &= \eta\\
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{任意次拉格朗日形函数}
+
+    给定{\bf 非负多重整数}指标向量 $\bfm_\alpha = (m_0, m_1, m_2)$, 在参考元 $K$ 上可以构造如下的 $p$ 次多项式函数:
+    \begin{equation}
+        \phi_{\alpha} = \frac{1}{\bfm_\alpha!}\prod_{i=0}^{2}\prod_{j_i =
+        0}^{m_i - 1} (p\lambda_i - j_i).
+        \label{eq:phi0}
+    \end{equation}
+    其中
+    \begin{align*}
+        &m_0 + m_1 + m_2 = p,\quad \bfm_\alpha! = m_0!m_1!m_2!, \\
+        &\prod_{j_i=0}^{-1}(p\lambda_i - j_i) = 1,\quad i = 0, 1, 2.
+    \end{align*}
+    \begin{remark}
+        $\phi_{\alpha}$ 可以看成 $\bfu=(\xi, \eta)$ 的函数, 也可以看成 $\blambda
+        = (\lambda_0, \lambda_1, \lambda_2)$ 的函数. 易知, 这样的函数可以定义
+        $n=(p+1)(p+2)/2$ 个.
+    \end{remark}
+\end{frame}
+
+\begin{frame}
+    对于每个形函数 $\phi_\alpha$ 对应的 {\bf 非负多重整数}指标向量 $\bfm_\alpha = (m_0, m_1,
+    m_2)$, 都可定义唯一的重心坐标
+    $$
+        \blambda_\alpha = (\frac{m_0}{p}, \frac{m_1}{p},\frac{m_2}{p}).
+    $$
+    满足
+    \begin{equation*}
+        \phi_\alpha(\blambda_\alpha) = 1.
+    \end{equation*}
+    给定一个不同的{\bf 非负多重整数}指标向量 $\bfm_\beta$, 有
+    \begin{equation*}
+        \phi_\alpha(\blambda_\beta) = 0.
+    \end{equation*}
+\end{frame} 
+
+\begin{frame}
+    \frametitle{高次拉格朗日三角形单元}
+    把参考单元 $K$ 上定义 $n$ 个 $p$ 次的拉格朗日形函数, 写成向量函数形式
+    $$
+        \bphi = [\phi_0, \phi_1, \cdots, \phi_{n-1}],
+    $$
+
+    给定 $\mbR^d$ 空间中的 $p$ 次拉格朗日三角形 $\tau$ 的 $n$ 个节点
+    $\{\bfx_i\}_{i=0}^{n-1}$, 则可以建立起从 $K$ 到 $\tau$ 的一个一一映射:
+    \begin{equation*}
+        \bfx = \sum_{i=0}^{n-1}\bfx_i\phi_i.
+    \end{equation*}
+    \begin{remark}
+        注意空间中点 $\bfx$ 默认是列向量.
+    \end{remark}
+\end{frame}
+
+\begin{frame}
+    \frametitle{一一映射的 Jacobi 矩阵}
+    \begin{align*}
+        \nabla_\bfu \bfx = \bfx_0 (\nabla_\bfu \phi_0)^T + \bfx_1(\nabla_\bfu
+        \phi_1)^T
+        + \cdots + \bfx_{n-1}(\nabla_\bfu \phi_{n-1})^T
+    \end{align*}
+    所以求映射的 Jacobi 矩阵, 只需要求每个拉格朗日形函数 $\phi_i$ 关于 $\bfu$ 的导数。
+    \begin{align*}
+        \nabla_\bfu \phi_i = 
+        \frac{\partial \phi_i}{\partial \lambda_0}\nabla_\bfu \lambda_0 + 
+        \frac{\partial \phi_i}{\partial \lambda_1}\nabla_\bfu \lambda_1 + 
+        \frac{\partial \phi_i}{\partial \lambda_2}\nabla_\bfu \lambda_2 
+    \end{align*}
+    \begin{remark}
+        注意 $\nabla_\bfu \phi_i = \begin{bmatrix} \partial_\xi \phi_i \\
+        \partial_\eta \phi_i \end{bmatrix}$ 是一个列向量.
+    \end{remark}
+\end{frame}
+
+\begin{frame}
+    \frametitle{一一映射的 Hessian 矩阵}
+    \begin{align*}
+        \nabla_\bfu^2 \bfx = \bfx_0 \nabla_\bfu[(\nabla_\bfu     
+        \phi_0)^T] +
+        \bfx_1\nabla_\bfu[(\nabla_\bfu \phi_1)^T]
+        + \cdots + \bfx_{n-1}\nabla_\bfu[(\nabla_\bfu\phi_{n-1})^T].
+    \end{align*}
+    所以求映射的 Jacobi 矩阵, 只需要求每个拉格朗日形函数 $\phi_i$ 关于 $\bfu$ 的导数。
+    \begin{align*}
+        \nabla_\bfu \phi_i = 
+        \frac{\partial \phi_i}{\partial \lambda_0}\nabla_\bfu \lambda_0 + 
+        \frac{\partial \phi_i}{\partial \lambda_1}\nabla_\bfu \lambda_1 + 
+        \frac{\partial \phi_i}{\partial \lambda_2}\nabla_\bfu \lambda_2 
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    考虑$\varphi_i$关于$\bfx \in l$的散度
+    \begin{align*}
+     \Delta_x \varphi_i 
+     &=\frac{1}{\sqrt{|G|}}[\frac{\partial}{\partial \xi},\frac{\partial}{\partial \xi}][\sqrt{|G|}G^{-1}[\varphi_{i_\xi},\varphi_{i_\eta}]] \\
+     &=G^{-1}:[\varphi_{i_{ab}}]
+    \end{align*}
+
+其中$[\varphi_{i_{ab}}]$为
+	$$
+	\begin{bmatrix}
+	\varphi_{i_{\xi\xi}}-(\nabla_x \varphi_i)^T \cdot \bfx_{\xi\xi} &
+	\varphi_{i_{\xi\eta}}-(\nabla_x \varphi_i)^T \cdot \bfx_{\xi\eta} \\
+	\varphi_{i_{\xi\eta}}-(\nabla_x \varphi_i)^T \cdot \bfx_{\xi\eta} &
+	\varphi_{i_{\eta\eta}}-(\nabla_x \varphi_i)^T \cdot \bfx_{\eta\eta} 
+	\end{bmatrix}
+	$$   
+\end{frame}
+
+\begin{frame}	
+其中
+	\begin{align*}
+	\bfx_{\xi\xi} &= \sum_{i=0}^{n-1}\bfx_i\varphi_{i_{\xi\xi}}.\\
+	\bfx_{\xi\eta} &= \sum_{i=0}^{n-1}\bfx_i\varphi_{i_{\xi\eta}}.\\
+	\bfx_{\eta\eta} &= \sum_{i=0}^{n-1}\bfx_i\varphi_{i_{\eta\eta}}.
+	\end{align*}
+
+
+\end{frame}
+
+
+\section{四边形}
+\section{四面体}
+\section{六面体}
+\section{三棱柱}
+\begin{frame}
+    \frametitle{参考三棱柱单元}
+    给定一个三棱柱单元 $\kappa$, 顶点分别为 (0, 0, 0), (1, 0, 0), (0, 1, 0),
+    (0, 0, 1), (1, 0, 1), (0, 1, 1), 它是由一个三角形单元及一个区间单元张成的.
+    
+    记三角形为单元 $K$, 其所在坐标系的变量记为 $\begin{bmatrix} \xi \\ \eta
+    \end{bmatrix}$, $K$ 上的重心坐标为
+    \begin{align*}
+        \lambda_0 = 1 - \xi - \eta,\quad \lambda_1 = \xi, 
+        \quad \lambda_2 = \eta.
+    \end{align*}
+    
+    同样地, 区间单元所在坐标的变量记为 $\zeta$, 其上的重心坐标为
+    \begin{align*}
+        \lambda_3 = 1-\zeta,\quad
+        \lambda_4 =\zeta.
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    三棱柱 $\kappa$ 所在坐标系的变量可记为 $\bfu = \begin{bmatrix} \xi \\ \eta
+    \\ \zeta \end{bmatrix}$ 
+    称 $\kappa$ 为{\bf 参考三棱柱单元}, 简称为{\bf 参考单元}.  易知, $\kappa$ 上的重心坐标为
+    \begin{align*}
+        \begin{bmatrix}
+            \Lambda_0 & \Lambda_1\\
+            \Lambda_2 & \Lambda_3\\
+            \Lambda_4 & \Lambda_5\\
+        \end{bmatrix}
+        =&
+        \begin{bmatrix}
+            \lambda_0 \\ \lambda_1 \\ \lambda_2 
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+            \lambda_3 & \lambda_4 
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            \lambda_0 \lambda_3 & \lambda_0 \lambda_4 \\
+            \lambda_1 \lambda_3 & \lambda_1 \lambda_4 \\
+            \lambda_2 \lambda_3 & \lambda_2 \lambda_4
+        \end{bmatrix}\\
+        =&
+        \begin{bmatrix}
+            (1-\xi-\eta)(1-\zeta) & (1-\xi-\eta)\zeta \\
+            \xi(1-\zeta) & \xi \zeta \\
+            \eta(1-\zeta) & \eta\zeta
+        \end{bmatrix}
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{高次拉格朗日三棱柱单元}
+    在参考三角形单元 $K$ 上定义 $m=(p+1)(p+2)/2$ 个 $p$ 次的拉格朗日形函数
+    $$
+        \Phi = \{\phi_0, \phi_1, \cdots, \phi_{m-1}\},
+    $$
+    
+    同样地, 在参考区间单元上定义 $p+1$ 个 $p$ 次的拉格朗日形函数
+    $$
+        \Psi = \{\psi_0, \psi_1, \cdots, \psi_p\},
+    $$
+    \begin{remark}
+        易知, 三棱柱单元上可以定义 $n=(p+1)^2(p+2)/2$ 个函数.
+    \end{remark}
+\end{frame}
+
+\begin{frame}
+    给定 $\mbR^d$ 空间中的 $p$ 次拉格朗日三棱柱 $\tau$ 的 $n$ 个节点
+    $\kappa$ 到 $\tau$ 的一个一一映射: \begin{align*}
+        \alpha = \Phi \otimes \Psi =&
+        \begin{bmatrix}
+            \phi_0 \psi_0 & \phi_0 \psi_1  & \cdots & \phi_0 \psi_p \\ 
+            \vdots        &   \ddots       & \ddots &  \vdots       \\
+            \phi_{m-1}\psi_0 & \phi_{m-1}\psi_1 & \cdots& \phi_{m-1}\psi_p  
+        \end{bmatrix}\\
+        &:=
+        \begin{bmatrix}
+            \alpha_{0,0}   & \alpha_{0,1}    & \cdots & \alpha_{0,p} \\ 
+            \vdots        &   \ddots       & \ddots &  \vdots       \\
+            \alpha_{m-1,0}   &  \alpha_{m-1,1}   & \cdots &  \alpha_{m-1,p} 
+        \end{bmatrix}.
+    \end{align*}
+    那么三棱柱上任意一点可以表示为
+    \begin{equation*}
+        \bfx = \sum\alpha_{i,j}\bfx_{i,j}.
+    \end{equation*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{一一映射的 Jacobi 矩阵}
+    \begin{equation*}
+        \nabla_\bfu \bfx = \sum\bfx_{i,j}(\nabla_\bfu \alpha_{i,j})^T.
+    \end{equation*} 
+    所以求映射的 Jacobi 矩阵, 只需要求每个拉格朗日形函数 $\alpha_{i,j}$ 关于
+    $\bfu$ 的导数.
+    \begin{align*}
+       \alpha_\xi = \Phi_\xi \otimes \Psi = 
+       \begin{bmatrix}
+       (\phi_0)_\xi \psi_0 & (\phi_0)_\xi \psi_1  & \cdots & (\phi_0)_\xi \psi_p \\ 
+       \vdots        &   \ddots       & \ddots &  \vdots       \\
+       (\phi_{m-1})_\xi \psi_0 &  (\phi_{m-1})_\xi \psi_1 &  \cdots&
+       (\phi_{m-1})_\xi\psi_p 
+       \end{bmatrix}
+   \end{align*}
+\end{frame}
+
+\begin{frame}
+   \begin{align*}
+       \alpha_\eta = \Phi_\eta \otimes \Psi =
+       \begin{bmatrix}
+      (\phi_0)_\eta \psi_0 & (\phi_0)_\eta \psi_1  & \cdots & (\phi_0)_\eta \psi_p \\ 
+       \vdots        &   \ddots       & \ddots &  \vdots       \\
+       (\phi_{m-1})_\eta \psi_0 &  (\phi_{m-1})_\eta \psi_1 &  \cdots&
+       (\phi_{m-1})_\eta\psi_p  
+       \end{bmatrix}\\
+       \alpha_\zeta = \Phi_ \otimes \Psi_\zeta = 
+       \begin{bmatrix}
+       \phi_0 (\psi_0)_\zeta & \phi_0 (\psi_1)_\zeta  & \cdots & \phi_0
+       (\psi_p)_\zeta \\ 
+       \vdots        &   \ddots       & \ddots &  \vdots       \\
+       \phi_{m-1} (\psi_0)_\zeta &  \phi_{m-1} (\psi_1)_\zeta &  \cdots&
+       \phi_{m-1}(\psi_p)_\zeta
+       \end{bmatrix} 
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{一一映射的 Hessian 矩阵}
+    \begin{align*}
+        \nabla_\bfu^2 \bfx = \sum\bfx_{i,j} \nabla_\bfu[(\nabla_\bfu
+        \alpha_{i,j})^T]
+    \end{align*}
+    所以求映射的 Hessian 矩阵, 只需要求 $(\nabla_\bfu \alpha_{i,j})^T$ 关于
+    $\bfu$ 的导数.
+\end{frame}
+
+\begin{frame}
+    \frametitle{第一基本形式}
+    $\tau$ 上的第一基本形式为:
+    \begin{align*}
+        I ==\bfv\bfG\bfv^T = <\rmd \bfx, \rmd \bfx> ,
+    \end{align*}
+    其中
+    \begin{align*}
+        \bfv =  
+        \begin{bmatrix}
+        d\xi & d\eta & d\zeta
+    \end{bmatrix},
+        \bfG = 
+        \begin{bmatrix}
+            g_{00} & g_{01} & g_{02} \\
+            g_{10} & g_{11} & g_{12} \\
+            g_{20} & g_{21} & g_{22}
+        \end{bmatrix},
+    \end{align*}
+    \begin{align*}
+        g_{00} = & <\bfx_\xi, \bfx_\xi>,\quad
+        g_{01} =  <\bfx_\xi, \bfx_\eta> \\
+        g_{02} = & <\bfx_\xi, \bfx_\zeta>,\quad
+        g_{10} =  <\bfx_\eta,\bfx_\xi> ,\\
+        g_{11} = & <\bfx_\eta,\bfx_\eta>,\quad
+        g_{12} =  <\bfx_\eta,\bfx_\zeta> ,\\
+        g_{20} = & <\bfx_\zeta,\bfx_\xi> ,\quad
+        g_{21} =  <\bfx_\zeta,\bfx_\eta>, \\
+        g_{22} = & <\bfx_\zeta,\bfx_\zeta>.
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{第二基本形式}
+    $\tau$ 上的第二基本形式为:
+    \begin{align*}
+        I ==\bfv\bfB\bfv^T = -<\rmd \bfx, \rmd \bfn> ,
+    \end{align*}
+    \begin{align*}
+        \bfB = 
+        \begin{bmatrix}
+            b_{00} & b_{01} & b_{02} \\
+            b_{10} & b_{11} & b_{12} \\
+            b_{20} & b_{21} & b_{22}
+        \end{bmatrix},
+    \end{align*}
+    \begin{align*}
+        b_{00} = & <\bfx_{\xi\xi}, \bfn> = -<\bfx_\xi, \bfn_\xi>,\\
+        b_{01} = & <\bfx_{\xi\eta}, \bfn> = -<\bfx_\xi, \bfn_\eta> 
+        = -<\bfx_\eta, \bfn_\xi> = b_{10},\\
+        b_{02} = & <\bfx_{\xi\zeta}, \bfn> = -<\bfx_\xi, \bfn_\zeta>
+        = -<\bfx_\zeta, \bfn_\xi> = b_{20},\\
+        b_{11} = & <\bfx_{\eta\eta},\bfn> = -<\bfx_\eta, \bfn_\eta>,\\
+        b_{12} = & <\bfx_{\eta\zeta},\bfn> = -<\bfx_\eta, \bfn_\zeta>
+        = -<\bfx_\eta, \bfn_\zeta> = b_{21},\\
+        b_{22} = & <\bfx_{\zeta\zeta},\bfn> = -<\bfx_\zeta, \bfn_\zeta>.
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{切梯度算子及体积}
+    $\tau$ 上的切梯度算子:
+    \begin{equation*}
+        \nabla_\tau \alpha_{i,j} = 
+        \nabla_\bfu\bfx G^{-1}\nabla_\bfu \alpha_{i,j} = 
+        [\bfx_\xi, \bfx_\eta, \bfx_\zeta]G^{-1}\nabla_\bfu \alpha_{i,j}
+    \end{equation*}
+
+    $\tau$ 上的体积为:
+    \begin{align*}
+        |\tau| = \int_{\tau}1\rmd\bfx =
+        \int_{\overline{\tau}}|\bfx_{\xi}\times\bfx_{\eta}\cdot\bfx_{\zeta}|
+        \rmd \bfu
+    \end{align*}
+    \begin{remark}
+        $\overline{\tau}$ 为标准三棱柱单元
+    \end{remark}
+\end{frame}
+
+\end{document}

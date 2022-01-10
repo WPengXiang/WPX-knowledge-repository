@@ -1,0 +1,164 @@
+% !Mode:: "TeX:UTF-8"
+%------------------------------------------------------
+%导入所需的包
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb} %放在前面不然会和xe的package冲突。
+\usepackage{graphicx} 
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{multicol}
+\usepackage{comment}
+\usepackage{subfigure}
+\usepackage{epsfig}
+\usepackage{float}
+\usepackage{booktabs} 
+\usepackage{algorithmicx}  
+\usepackage{algorithm} % 算法
+%\usepackage{algorithmic}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{setspace}
+\usepackage{pdfpages}
+%\usepackage{cleveref}
+\floatname{algorithm}{算法}
+\renewcommand{\algorithmicrequire}{ \textbf{输入:}} %Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{ \textbf{输出:}} %UseOutput in the format of Algorithm
+
+
+\usepackage{extarrows}
+\usepackage{chemarrow}%箭头或等号上下方可以写文字
+\usepackage{indentfirst}
+%\usepackage[colorlinks,linkcolor=blue,anchorcolor=blue,citecolor=blue]{hyperref}
+\usepackage[colorlinks,linkcolor=black,anchorcolor=black,citecolor=black]{hyperref}
+\usepackage{geometry}
+\geometry{a4paper,left=3cm,right=2cm,top=3cm,bottom=2.5cm}           % 页边距设置
+
+\usepackage{xltxtra,fontspec,xunicode}
+\usepackage[slantfont,boldfont]{xeCJK} % 允许斜体和粗体
+\usepackage{ctex}
+
+\usepackage{listings}   % 源代码列表
+
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{xCJKnumb}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+
+%------------------------------------------------------
+%设置中文字体
+%\setCJKmainfont[BoldFont=AdobeHeitiStd.otf,ItalicFont=AdobeKaitiStd.otf]{AdobeSongStd.otf}
+%\setCJKsansfont[Path="fonts/Adobe/"]{AdobeKaitiStd.otf}
+%\setCJKmonofont[Path="fonts/Adobe/"]{AdobeFangsongStd.otf}
+ 
+%\setCJKfamilyfont{zhsong}[Path="fonts/Adobe/"]{AdobeSongStd.otf} %设定别名
+%\setCJKfamilyfont{zhhei}[Path="fonts/Adobe/"]{AdobeHeitiStd.otf}
+%\setCJKfamilyfont{zhfs}[Path="fonts/Adobe/"]{AdobeFangsongStd.otf}
+%\setCJKfamilyfont{zhkai}[Path="fonts/Adobe/"]{AdobeKaitiStd.otf}
+%\setCJKfamilyfont{lishu}[Path="fonts/Adobe/"]{lishu.TTF}
+
+
+%\newcommand*{\songti}{\CJKfamily{zhsong}} % 宋体
+%\newcommand*{\heiti}{\CJKfamily{zhhei}}   % 黑体
+%\newcommand*{\kaishu}{\CJKfamily{zhkai}}  % 楷书
+%\newcommand*{\fangsong}{\CJKfamily{zhfs}} % 仿宋
+
+                                             
+ 
+\setmainfont{Times New Roman}    % 英文默认字体
+\setCJKmainfont{SimSun}		 % 中文默认字体
+
+%\setCJKsansfont{KaiTi}
+%\setCJKmonofont{Fangsong}
+ 
+
+%\newfontfamily\kaiti{KaiTi} 		%楷体	
+%\newfontfamily\songti{SimSun}		% 宋体
+%\newfontfamily\lisu{LiSu}		      % 隶书	
+%\newfontfamily\fangsong{FangSong}	% 仿宋
+%\newfontfamily\heiti{SimHei}		% 黑体
+%---------------------------------------------
+%设置字体大小
+
+
+%\newcommand{\chuhao}{\fontsize{42pt}{\baselineskip}\selectfont}
+\newcommand{\chuhao}{\fontsize{42pt}{20pt}\selectfont}
+\newcommand{\xiaochuhao}{\fontsize{36pt}{20pt}\selectfont}
+\newcommand{\yihao}{\fontsize{28pt}{20pt}\selectfont}
+\newcommand{\xiaoyihao}{\fontsize{22pt}{20pt}\selectfont}
+\newcommand{\erhao}{\fontsize{21pt}{20pt}\selectfont}
+\newcommand{\xiaoerhao}{\fontsize{18pt}{20pt}\selectfont}
+\newcommand{\sanhao}{\fontsize{15.75pt}{20pt}\selectfont}
+\newcommand{\sihao}{\fontsize{14pt}{20pt}\selectfont}
+\newcommand{\xiaosihao}{\fontsize{12pt}{20pt}\selectfont}
+\newcommand{\wuhao}{\fontsize{10.5pt}{20pt}\selectfont}
+\newcommand{\xiaowuhao}{\fontsize{9pt}{20pt}\selectfont}
+\newcommand{\liuhao}{\fontsize{7.875pt}{20pt}\selectfont}
+\newcommand{\qihao}{\fontsize{5.25pt}{20pt}\selectfont}
+
+\newcommand{\rmnum}[1]{\romannumeral #1} %小写罗马数字
+\newcommand{\Rmnum}[1]{\uppercase\expandafter{\romannumeral #1}} %大写罗马数字
+
+%-----------------------------------------------
+%把Chapter 1 更改成 第一章
+%
+%\titleformat{\chapter}{\centering\Huge\bfseries}{第\,\xCJKnumber{\thechapter}\,章}{1em} {}
+%\titleformat{\chapter}{\centering\Huge\bfseries}{第\,\thechapter{}\,章}{1em} {}
+%\renewcommand\chaptername{第\xCJKnumber{\arabic{chapter}}章}
+
+\titleformat{\chapter}{\centering\sanhao\bfseries}{第\,\xCJKnumber{\thechapter}\,章}{1em} {} % 章节(一级)标题，居中、三号、加粗
+\titleformat{\section}{\sihao\bfseries}{\thesection}{1em}{\textbf}  % 二级标题，四号,加粗
+\titleformat{\subsection}{\sihao\bfseries}{\thesubsection}{1em}{\textbf} % 三级标题，四号,加粗
+%\titleformat{\subsubsection}{\xiaosi}{\thesubsubsection}{1em}{\textbf}
+
+%-------------------------
+\renewcommand\contentsname{目\hspace{1em}录}
+\renewcommand\listfigurename{图\hspace{1em}目\hspace{1em}录}
+\renewcommand\listtablename{表\hspace{1em}目\hspace{1em}录}
+\newcommand\listequationname{公式索引}
+\newcommand\equationname{公式}
+\renewcommand\bibname{参考文献}
+\renewcommand\indexname{索引}
+\renewcommand\figurename{图}
+\renewcommand\tablename{表}
+\renewcommand\appendixname{附录}
+%---------------
+%定理, 定义 等环境的设置
+\newtheorem{assumption}{\textbf{假设}}[section]
+\newtheorem{definition}{\textbf{定义}}[section]
+\newtheorem{proposition}{\textbf{命题}}[section]
+\newtheorem{lemma}{\textbf{引理}}[section]
+\newtheorem{theorem}{\textbf{定理}}[section]
+\newtheorem{axiom}{\textbf{公理}}[section]
+\newtheorem{corollary}{\textbf{推论}}[section]
+\newtheorem{exercise}{\textbf{练习}}[section]
+\newtheorem{example}{\textbf{例}}[section]
+\newtheorem{mymark}{\textbf{注}}[section]
+\newtheorem{problem}{\textbf{问题}}[section]
+\newtheorem{conjecture}{\textbf{猜想}}[section]
+
+\newenvironment{remark}{\begin{mymark}\wuhao}{\end{mymark}}
+
+%%% -------------------------------------------------------------
+\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}
+
+%%%-------------------------------------------------------------%
+\setlength{\parindent}{2em}
+
+%%---使xelatex在进行中文断行时处理的更美观些
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
+
+%------------------------------------------------------------%
+\pagestyle{empty}                                % 设置页眉、页脚均为空
+\xiaosihao                                       % 小四号字体
+\setlength{\baselineskip}{20pt}                  % 调整行距
+
+%----设置前置目录---------------------------------------------------------%
+\titlecontents{chapter}[0em]{\sihao}{\makebox[4.1em][l]{第\xCJKnumber{\thecontentslabel}章}}{}{\titlerule*[0.7pc]{$\cdot$}\contentspage}    % 四号字体
+\titlecontents{section}[1.5cm]{\sihao}{\contentslabel{2em}}{}{\titlerule*[0.7pc]{$\cdot$}\contentspage\hspace{1.5cm}}    % 四号字体
+\titlecontents{subsection}[2.8cm]{\sihao}{\contentslabel{2.5em}}{}{\titlerule*[0.7pc]{$\cdot$}\contentspage\hspace{2.8cm}}    % 四号字体
+
+

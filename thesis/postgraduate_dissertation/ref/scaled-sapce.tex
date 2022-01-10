@@ -1,0 +1,98 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{beamer}
+
+\usetheme{Darmstadt}
+\useinnertheme{rounded}
+
+\usecolortheme{beaver}
+%\usecolortheme{albatross}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+%\usecolortheme{default}
+
+
+\setbeamerfont*{frametitle}{size=\normalsize,series=\bfseries}
+\setbeamertemplate{navigation symbols}{}
+
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+
+\usepackage{biblatex}
+\addbibresource{ref.bib}
+
+\usefonttheme[onlymath]{serif}
+\numberwithin{subsection}{section}
+%\usefonttheme[onlylarge]{structurebold}
+\setbeamercovered{transparent}
+
+\title{FEALPy 偏微分方程数值解程序设计与实现: {\bf 任意次缩放单项式空间}}
+\author{魏华祎}
+\institute[XTU]{
+weihuayi@xtu.edu.cn\\
+\vspace{5pt}
+湘潭大学$\bullet$数学与计算科学学院\\
+}
+ 
+\date[XTU]
+{
+    \today
+}
+
+
+\AtBeginSection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsection] 
+  }
+}
+
+\AtBeginSubsection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsubsection] 
+  }
+}
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{二维缩放单项式空间}
+
+\begin{frame}
+    \frametitle{}
+    \begin{table}[H]
+\begin{tabular}{rccccccccccccc}
+    $k=0$:&    &    &    &    &    &    & 0: $1$\\\noalign{\smallskip\smallskip}
+    $k=1$:&    &    &    &    &    &  1:$\bar x$ &    &  2:$\bar y$\\\noalign{\smallskip\smallskip}
+    $k=2$:&    &    &    &    &  3:${\bar x}^2$ &    &  4:$\bar x\bar y$ &    & 5:${\bar y}^2$\\\noalign{\smallskip\smallskip}
+    $k=3$:&    &    &    &  6:${\bar x}^3$ &    &  7:${\bar x}^2\bar y$ &    & 8:$\bar x{\bar y}^2$ &    &  9:${\bar y}^3$\\\noalign{\smallskip\smallskip}
+    $k=4$:&    &    &  10:${\bar x}^4$ &    &  11:${\bar x}^3\bar y$ &    & 12:${\bar x}^2{\bar y}^2$ &    &  13:${\bar x}{\bar y}^3$ &    & 14:${\bar y}^4$ \\\noalign{\smallskip\smallskip}
+    $k=5$:&    &  15:${\bar x}^5$ &    &  16:${\bar x}^4\bar y$ &    & 17:${\bar x}^3{\bar y}^2$ &    & 18:${\bar x}^2{\bar y}^3$ &    & 19:${\bar x}{\bar y}^4$ &    &  20:${\bar y}^5$
+    \\\noalign{\smallskip\smallskip}
+\end{tabular}
+    \caption{缩放单项式函数及其编号规则, 其中 $\bar x = \frac{x - x_K}{h_K}$,
+    $\bar y = \frac{ y - y_K}{h_K}$.}\label{tb:scalep}
+\end{table}
+\end{frame}
+
+\section{三维缩放单项式空间}
+
+\end{document}

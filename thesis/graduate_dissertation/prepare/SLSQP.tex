@@ -1,0 +1,148 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{SLSQP(Sequential Least SQuares Programming optimization algorithm)}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{数学推导}
+该算法主要是来解决非线性约束的最小值问题．主要思想为：在求解约束优化问题时，在每一初始迭代点构造一个二次规划子问题，将该子问题的解作为迭代搜索的方向，并选取相应的效益函数确定迭代搜索的步长; 通过求解上述子问题修正迭代点，直到二次规划的结果逼近原非线性规划问题的最优解。
+
+\subsection{问题模型}
+\begin{equation}
+\min _{x \in R^{n}} f(x)
+\end{equation}
+使得
+\begin{equation}\begin{array}{c}
+g_{j}(x)=0, \quad j=1, \ldots, m_{e} \\
+g_{j}(x) \geq 0, \quad j=m_{e}+1, \ldots, m \\
+\quad x_{i} \leq x \leq x_{n}
+\end{array}\end{equation}
+其中$f: R^{n} \rightarrow R^{1}$为目标函数,$g=(g_1,g_2,...,g_m) R^{n} \rightarrow R^{m}$为约束条件．这两个函数都被假设为连续可微的．
+\subsection{算法过程}
+主要过程为，给定一个初始向量$x^0$,通过
+
+\begin{equation}
+x^{k+1}:=x^k+\alpha^k d^k
+\end{equation}
+
+获得第k+1次迭代结果$x^{k+1}$,其中$d^k$为第k步搜寻方向，$alpha^k$为搜寻步长．
+
+\subsubsection{搜寻方向}
+搜寻方向是通过一个二次规子问题来决定，其由该问题的lagrange函数的二次逼近
+
+\begin{equation}
+L(x, \lambda)=f(x)-\sum_{j=1}^{m} \lambda_{j} g_{j}(x)
+\end{equation}
+
+和约束条件的线性逼近来决定
+
+该二次规划的标准形式可以写为
+
+\begin{equation}
+\min _{d \in R^{n}} \frac{1}{2} d^{T} B^{k} d+\nabla f\left(x^{k}\right) d
+\end{equation}
+
+使得
+
+\begin{equation}
+\nabla g_{j}\left(x^{k}\right) d+g_{j}\left(x^{k}\right)=0, \quad j=1, \ldots, m_{c}
+\end{equation}
+
+\begin{equation}\nabla g_{j}\left(x^{k}\right) d+g_{j}\left(x^{k}\right) \geq 0, \quad j=m_{e}+1, \ldots, m
+\end{equation}
+
+其中$B:=\nabla_{x x}^{2} L(x, \lambda)$
+
+\subsubsection{步长}
+当$x^k$远离最佳点的时候我们要通过惩罚函数来修正步长，从而确保收敛性．
+
+惩罚函数为
+
+\begin{equation}
+\phi(x ; e):=f(x)+\sum_{j=1}^{m_{0}} \varrho_{j}\left|g_{j}(x)\right|+\sum_{j=m_{e}+1}^{m} \varrho_{j}\left|g_{j}(x)\right|_{-}
+\end{equation}
+
+其中$\left|g_{j}(x)\right|_{-}:=\left|\min (0, g_{j}(x)) \right|$,$e_j$为惩罚参数
+
+优化函数为$varphi : R^1 \rightarrow R^1$
+
+\begin{equation}
+\varphi(\alpha):=\phi\left(x^{k}+\alpha d^{k}\right)
+\end{equation}
+
+$e_j$惩罚参数的更新根据下面的式子
+
+\begin{equation}\label{1}
+\varrho_{j}:=\max \left(\frac{1}{2}\left(e_{j}^{-}+\left|\mu_{j}\right|\right),\left|\mu_{j}\right|\right), \quad j=1, \ldots, m
+\end{equation}
+
+其中$\mu_{j}$表示在二次规划中第ｊ个约束条件的lagrange乘子，$e_{j}^{-}$是上一次迭代的第ｊ个惩罚参数，开始时$e^0_j=0$
+
+
+
+\subsubsection{约束条件一致性保证}
+为了克服在二次规划子问题中约束条件可能变得不一致，我们可以通过附加参量$\delta$引入二次规划中，来保证一致性，这样二次规划变为
+
+\begin{equation}
+\min _{d \in R^{n}} \frac{1}{2} d^{T} B^{k} d+\nabla f\left(x^{k}\right) d+\frac{1}{2} \rho^{k}\left(\delta^{k}\right)^{2}
+\end{equation}
+
+使得
+
+\begin{equation}\begin{array}{c}
+\nabla g_{j}\left(x^{k}\right) d+\delta^{k} g_{j}\left(x^{k}\right)=0, \quad j=1, \ldots, m_{e} \\
+\nabla g_{j}\left(x^{k}\right) d+\delta_{j}^{k} g_{j}\left(x^{k}\right) \geq 0, \quad j=m_{e}+1, \ldots, m \\
+0 \leq \delta^{k} \leq 1
+\end{array}\end{equation}
+
+其中
+
+\begin{equation}\delta_{j}^{k}:=\left\{\begin{array}{ll}
+1, & \text { if } g_{j}\left(x^{k}\right)>0 \\
+\sigma^{k}, & \text { otherwise }
+\end{array}\right.\end{equation}
+要在满足约束条件下尽可能的大
+
+初始方向为$\left(d^{0}, \delta^{0}\right)^{T}=(0, \ldots, 0,1)^{T}$显然满足与约束条件．
+
+\subsubsection{B矩阵的更新}
+\begin{equation}
+B^{k+1}:=B^{k}+\frac{q^{k}\left(q^{k}\right)^{T}}{\left(q^{k}\right)^{T} s^{k}}-\frac{B^{k} s^{k}\left(s^{k}\right)^{T} B^{k}}{\left(s^{k}\right)^{T} B^{k} s^{k}}
+\end{equation}
+
+其中
+
+\begin{equation}
+s^{k}:=x^{k+1}-x^{k}=\alpha^{k} d^{k}
+\end{equation}
+
+\begin{equation}q^{k}:=\theta^{k} \eta^{k}+\left(1-\theta^{k}\right) B^{k} s^{k}\end{equation}
+
+这里的$\eta^{k}$为前后两次迭代lagrange函数梯度的差值
+
+\begin{equation}
+\eta^{k}:=\nabla_{x} l\left(x^{k+1}, \lambda^{k}\right)-\nabla_{x} l\left(x^{k}, \lambda^{k}\right)
+\end{equation}
+
+
+\begin{equation}\theta^{k}:=\left\{\begin{array}{ll}
+1, & \text { if }\left(s^{k}\right)^{T} \eta^{k} \geq 0.2\left(s^{k}\right)^{T} B^{k} s^{k} \\
+\frac{0.8\left(s^{k}\right)^{T} B^{k}s^{k}}{\left(x^{k}\right)^{T} B^{k}x^{k}-\left(x^{k}\right)^{T} \eta^{k}}, & \text { otherwisc }
+\end{array}\right.
+\end{equation}
+其可以保证
+\begin{equation}
+\left(s^{k}\right)^{T} q^{k} \geq 0.2\left(s^{k}\right)^{r} B^{k} s^{k}
+\end{equation}
+
+
+\end{document}
+
+
+

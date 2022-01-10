@@ -1,0 +1,534 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\begin{document}
+\title{高维高次协调拉格朗日有限元算法及其应用}
+\author{魏华祎}
+\date{\chntoday}
+\maketitle
+
+有限元方法是一种基于 PDE (partial differential equations) 的变分形式
+(variational formulation) 求解 PDE 近似解的方法。 本章主要但要拉格朗日有限元方法
+的算法与程序设计细节。
+
+\section{预备知识}
+本节主要介绍有限元算法中经常用到的基础知识。
+\subsection{散度定理}
+给定向量函数 $\bfF(x)$, 其定义域为 $\Omega\in\mathbb R^n$, $\bfn$ 是 $\Omega$ 边界 $\partial \Omega$ 上的单位外法线向量.
+$$
+\int_{\Omega} \nabla\cdot\bfF~ \rmd \bfx = \int_{\partial \Omega}\bfF\cdot\bfn ~\rmd s
+$$
+这就是{\bf 散度定理}。 下面给出一些简单的应用：
+$$
+\begin{aligned}
+\int_{\Omega} \nabla\cdot(v\nabla u)~\rmd \bfx &= \int_{\partial\Omega} v\nabla
+u\cdot\bfn~\rmd s\\
+\int_{\Omega} v\Delta u~\rmd \bfx + \int_{\Omega}\nabla u\cdot\nabla v~\rmd \bfx
+&= \int_{\partial\Omega} v\nabla u\cdot\bfn~\rmd s
+\end{aligned}
+$$
+
+$$
+\int_\Omega v_x \rmd\bfx = \int_\Omega \nabla\cdot \begin{pmatrix}
+v\\0
+\end{pmatrix} \rmd \bfx =
+\int_{\partial \Omega} vn_x \mathrm d s
+$$
+
+\subsection{重心坐标}
+
+对标准有限元来说， {\bf 重心坐标}是一个非常重要的概念， 它是构造有限元基函数的
+基础。 下面介绍重心坐标的相关知识。
+
+设 $\{\bfx_i = (x_{i,0}, x_{i, 1}, \cdots, x_{i, d-1})^T\}_{i=0}^{d}$ 是 $\mathbb
+    R^d$ 空间中的 $d+1$ 个点，如果它们不在一个超平面上， 即 $d$ 维向量集合
+    $\{\bfx_0\bfx_i\}_{i=1}^d$ 是线性独立的，也等价于下面的矩阵非奇异
+\begin{equation}
+    \bfA =\begin{pmatrix}
+        x_{0, 0} & x_{1, 0} & \cdots & x_{d, 0} \\
+        x_{0, 1} & x_{1, 1} & \cdots & x_{d, 1} \\
+        \vdots   & \vdots   & \ddots & \vdots \\
+        x_{0, d-1} & x_{1, d-1} & \cdots & x_{d, d-1}\\
+        1 & 1 & \cdots & 1
+    \end{pmatrix}
+\end{equation}
+
+ 
+给定任意点 $\bfx=(x_0, x_1, \cdots, x_{d-1})^T\in \mathbb R^d$, 可以得到一组实数
+值 $\blambda := (\lambda_0(\bfx), \lambda_1(\bfx), \cdots, \lambda_d(\bfx))^T$, 满足如下的方程
+\begin{equation}
+    \bfA \blambda=
+    \begin{pmatrix}
+        \bfx \\ 1
+    \end{pmatrix}
+    \label{eq:lbc}
+\end{equation}
+即
+\begin{equation}
+    \bfx = \sum\limits_{i=0}^{d}\lambda_i(\bfx) \bfx_i,
+    \text{ with} \sum\limits_{i=0}^{d}\lambda_i(\bfx) = 1.
+\end{equation}
+
+点集 $\{\bfx_i\}_{i=0}^d$ 的凸壳
+\begin{equation}
+    \tau = \{\bfx = \sum_{i=0}^{d}\lambda_i\bfx_i | 0\leq \lambda_i \leq
+    1, \sum_{i=0}^d\lambda_i = 1\}
+\end{equation}
+就称为由点集 $\{\bfx_i\}_{i=0}^d$ 生成的几何 $d$-单纯形。 例如， 区间是 1-单纯形，三
+角形是一个 2-单纯形， 四面体是一个 3-单纯形。
+
+而 $\lambda_0(\bfx)$, $\lambda_1(\bfx)$, $\cdots$, $\lambda_{d}(\bfx)$ 就称为
+$\bfx$
+关于点集 $\{\bfx_i\}_{i=0}^d$ 重心坐标。  易知 $\lambda_0(\bfx)$,
+$\lambda_1(\bfx)$, $\cdots$, $\lambda_{d}(\bfx)$ 是关于 $\bfx$ 的线性函数并且，
+\begin{equation}
+    \lambda_i(\bfx_j) = 
+    \begin{cases}
+        1, & i = j\\
+        0, & i\not= j
+    \end{cases}, 
+    i, j = 0, \cdots, d
+\end{equation}
+
+\subsection{Silvester 插值多项式}
+
+Silvester 插值多项式\cite{sheng2008} 是构造高次基函数的基础，它的定义如下
+$$
+R_i(k,\lambda)=
+\begin{cases}
+\frac{1}{i!}\prod_{l=0}^{i-1} (k\lambda-l),~& 1\leq i\leq k\\
+1,& i=0\\
+\end{cases}
+$$
+其中 $\lambda \in [0,1]$，$k$ 表示区间 $[0,1]$ 的等分数。易知 
+
+\begin{itemize}
+    \item $R_i(k, \lambda)$ 是关于 $\lambda$ 的 $i$ 次多项式。
+    \item 当 $\lambda= \frac{l}{k}, l=0, 1, \cdots, i-1$ 时, $R_i(k, \lambda) =0$。
+    \item 当 $\lambda=\frac{i}{k}$ 时 $R_i(k, \lambda) = 1$。
+\end{itemize}
+
+\section{Poisson 模型}
+考虑如下D氏边界条件的Poisson方程:
+
+\begin{eqnarray}
+    -\Delta u(\mathbf x) &=& f(\mathbf x),\text{ on } \Omega.\label{eq:P}\\
+    u|_{\partial\Omega} &=& 0.
+\end{eqnarray}
+
+\section{Galerkin 方法}
+
+引入函数空间 $H^1(\Omega)$， 对于任意 $v \in H^1(\Omega)$， $v$和它的一阶导数都
+在 $\Omega$ 上 $L^2$ 可积。 这里的 $H^1(\Omega)$ 是一个无限维的空间。 另外， 引
+入空间 $H^1_0(\Omega) := \{v\in H^1(\Omega), v|_{\partial\Omega} = 0\}$.
+
+对于任意的 $v\in H^1_0(\Omega)$， 同乘以方程 \eqref{eq:P} 的两端， 然后做分部积
+分可得：
+\begin{equation}\label{eq:wg}
+    \int_{\Omega}\nabla u\cdot\nabla v\mathrm{d}x = \int_{\Omega}fv\mathrm{d}x,
+    \quad\forall v \in H^1_0(\Omega).
+\end{equation}
+原问题就转化为: 求解 $u\in H_0^1(\Omega)$， 满足
+\begin{equation}\label{eq:W}
+    a(u, v) = (f,v) \text{ for all }v\in H_0^1(\Omega).
+\end{equation}
+其中
+$$
+a(u, v) = \int_{\Omega}\nabla u\cdot\nabla v\mathrm{d}x,
+\quad (f,v) =  \int_{\Omega}fv\mathrm{d}x.
+$$
+
+下面我们考虑所谓 Galerkin 方法来求 \eqref{eq:W} 的逼近解。 上面 $H_0^1(\Omega)$
+是一个无限维的空间， 为了把无限维的问题转化为有限维的问题， 引入 $H_0^1(\Omega)$
+的一个有限维的子空间 $V$， 比如 $V=\mathrm{span}\{\phi_0，\phi_1，\ldots，
+\phi_{N-1}\}$。 对任何 $v \in V$， 它都有唯一的表示
+
+$$
+v = \sum\limits_{i=0}^{N-1} v_i\phi_i.
+$$
+可以看出空间 $V$ 和 $N$ 维向量空间 $\mathbb{R}^N$ 是同构的， 即
+$$
+v = \sum\limits_{i=0}^{N-1} v_i\phi_i\leftrightarrow\mathbf{v} =
+\begin{pmatrix}
+    v_0 \\ v_1 \\ \vdots \\ v_{N-1}
+\end{pmatrix}
+$$
+其中列向量 $\mathbf{v}$ 是 $v$ 在基 $\{\phi_i\}_{i=1}^N$ 的坐标。 
+
+下面可以构造一个离散的问题: 求 $ \tilde u = \sum_{i=1}^{N}u_i \phi_i \in V$， 其
+对应的向量为 $\mathbf u$， 满足
+\begin{equation}
+    \label{eq:d}
+    a(\tilde u, v) = (f, v),
+    \quad\forall~v\in V.
+\end{equation}
+方程 \eqref{eq:d} 中仍然包含有无穷多个方程。 但 $V$ 是一个有限维空间， 本质上
+$\tilde u= \sum_{i=0}^{N-1}u_i \phi_i$ 只需要满足下面 $N$ 方程即可
+$$
+\begin{cases}
+    a(\tilde u, \phi_0) = (f, \phi_0) \\
+    a(\tilde u, \phi_1) = (f, \phi_1) \\
+    \vdots \\
+    a(\tilde u, \phi_{N-1}) = (f, \phi_{N-1})
+\end{cases}
+$$
+即
+$$
+\begin{cases}
+    a(\sum_{i=0}^{N-1}u_i \phi_i, \phi_0) = (f, \phi_0) \\
+    a(\sum_{i=0}^{N-1}u_i \phi_i, \phi_1) = (f, \phi_1) \\
+    \vdots \\
+    a(\sum_{i=0}^{N-1}u_i \phi_i, \phi_{N-1}) = (f, \phi_{N-1})
+\end{cases}
+$$
+上面的方程可以改写为下面的形式:
+$$
+\begin{pmatrix}
+    a(\phi_0, \phi_0) & a(\phi_1, \phi_0) & \cdots & a(\phi_{N-1}, \phi_0) \\
+    a(\phi_0, \phi_1) & a(\phi_1, \phi_1) & \cdots & a(\phi_{N-1}, \phi_1) \\
+    \vdots & \vdots & \ddots & \vdots \\
+    a(\phi_0, \phi_{N-1}) & a(\phi_1, \phi_{N-1}) & \cdots & a(\phi_{N-1},
+    \phi_{N-1}) \\
+\end{pmatrix}
+\begin{pmatrix}
+    u_0 \\ u_1 \\ \vdots \\ u_{N-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+    (f, \phi_0) \\ (f, \phi_1) \\ \vdots \\ (f, \phi_{N-1})
+\end{pmatrix}
+$$
+上面的左端矩阵称为{\bf 刚度矩阵}(stiff matrix)，简记为 $\mathbf A$；右端向量
+称为 {\bf 载荷向量} (load vector), 简记为 $\mathbf f$。 上面整个线性代数系统
+简记为：
+$$
+\mathbf A\mathbf u = \mathbf f.
+$$
+求解可得原问题的逼近解:
+$$
+\tilde u = \sum\limits_{i=0}^{N-1} u_i\phi_i.
+$$
+
+\section{单纯形上的拉格朗日有限元基函数构造}
+
+在这一节，我们讨论几何$d$-单纯形上的任意$k$次拉格朗日形函数的构造。
+
+\subsection{任意维任意次的公式}
+
+记 $\bfm$ 为一个 $d+1$ 维的多重指标向量 $(m_0, m_1, \cdots, m_d)$，满足  
+\begin{equation*}
+    m_i \geq 0, i=0, 1, \cdots, d, \text{ and } \sum_{i=0}^d m_i=k.
+\end{equation*}
+$\bfm$ 所有可能取值的个数为： 
+\begin{equation*}
+    n_k := \begin{pmatrix}
+        d \\ k+d 
+    \end{pmatrix}
+\end{equation*}
+
+记 $\alpha$ 为多重指标 $\bfm$ 从 0 到 $n_k-1$ 的一维自然编号， 下面表格
+\ref{tb:num} 展示了具体编号规则：
+\begin{table}[H]
+    \centering
+    \begin{tabular}{| l | c | c | c | c | c|}
+    \hline
+    $\alpha$ & \multicolumn{5}{c|}{$\bfm_\alpha$} \\\hline
+    0 & k   & 0 & 0 & $\cdots$ & 0 \\\hline
+    1 & k-1 & 1 & 0 & $\cdots$ & 0 \\\hline
+    2 & k-1 & 0 & 1 & $\cdots$ & 0 \\\hline
+    $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\\hline
+    d & k-1 & 0 & 0 & $\cdots$ & 1 \\\hline
+    d+1 & k-2 & 2 & 0 & $\cdots$ & 0 \\\hline
+    d+2 & k-2 & 1 & 1 & $\cdots$ & 0 \\\hline
+    $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\\hline
+    2d-1 & k-2 & 1 & 0 & $\cdots$ & 1 \\\hline
+    2d & k-2 & 0 & 2 & $\cdots$ & 0 \\\hline
+    $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\\hline
+    $n_p$ & 0 & 0 & 0 & $\cdots$ & k \\
+    \hline
+    \end{tabular}
+    \caption{多重指标 $\bfm_\alpha$ 自然编号规则。}\label{tb:num}
+\end{table}
+
+给定第 $\alpha$ 个多重指标 $\bfm_\alpha$, 可以用如下方式构造一个 $d$-单纯形
+$\tau$ 上的 $k$ 次多项式函数
+
+\begin{equation}
+    \phi_{\alpha}(\bfx) = \frac{1}{\bfm_\alpha!}\prod_{i=0}^{d}\prod_{j =
+    0}^{m_i - 1} (k\lambda_i(\bfx) - j) = \prod_{i=0}^dR_{m_i}(k, \lambda_i(\bfx))
+    \label{eq:phi0}
+\end{equation}
+其中
+\begin{align*}
+    \bfm_\alpha! = m_0!m_1!\cdots m_d! 
+\end{align*}
+对于每一个多重指标 $\bfm_\alpha$, 都可以找到一个在 $d$-单纯形 $\tau$ 中的点
+$\bfx_\alpha$ 满足：
+\begin{equation*}
+    \bfx_\alpha = \sum_{i=0}^d \frac{m_i}{k} \bfx_i. 
+\end{equation*}
+其中 $m_i$ 是 $\bfm_\alpha$ 的第 $i$ 个分量。容易验证 $\bfx_\alpha$ 即是
+$\phi_{\alpha}$ 对应的插值点，满足 
+\begin{equation}
+    \phi_\alpha(\bfx_\beta) = 
+    \begin{cases}
+        1, & \alpha = \beta\\
+        0, & \alpha \ne \beta
+    \end{cases}
+    \label{eq:phi1}
+\end{equation}
+其中 $\alpha, \beta = 0, 1, \cdots, n_k-1$。 
+
+给定一个 $\mbR^d$ 空间中的三角形网格 $\mcT$, 基于 \eqref{eq:phi0}，就可以构
+造任意次的分片连续拉格朗日有限元空间。
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.4]{./figures/int.pdf}
+    \includegraphics[scale=0.4]{./figures/intdof4.pdf}
+    \caption{区间单元上的 4 次有限元自由度插值节点分布与编号。}
+    \label{fig:int4}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.4]{./figures/tri.pdf}
+    \includegraphics[scale=0.4]{./figures/tridof4.pdf}
+    \caption{三角形单元上的 4 次有限元自由度插值节点分布与编号。}
+    \label{fig:tri4}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.4]{./figures/tet.pdf}
+    \includegraphics[scale=0.4]{./figures/tetdof4.pdf}
+    \caption{四面体单元上的 4 次有限元自由度插值节点分布与编号。}
+    \label{fig:tet4}
+\end{figure}
+\newpage 
+
+\subsection{$\phi_\alpha$ 和 $\nabla \phi_\alpha$ 面向数组的计算}
+
+这一节，我们讨论如何用面向数组的方式来计算 $\phi_\alpha$ 和 $\nabla \phi_\alpha$
+在任意一个重心坐标点 $(\lambda_0, \lambda_1, \cdots, \lambda_d)$ 处的值
+
+首先构造一个向量
+\begin{equation*}
+    \bfP = (\frac{1}{0!}, \frac{1}{1!}, \frac{1}{2!}, \cdots, \frac{1}{k!}),
+\end{equation*}
+和一个矩阵
+\begin{equation}\label{eq:A}
+\bfA :=                                                                            
+\begin{pmatrix}  
+1  &  1  & \cdot & 1 \\
+k\lambda_0 & k\lambda_1 & \cdots & k\lambda_d\\                                             
+k\lambda_0 - 1 & k\lambda_1 - 1 & \cdots & k\lambda_d - 1\\   
+\vdots & \vdots & \ddots & \vdots \\                                                     
+k\lambda_0 - (k - 1) & k\lambda_1 - (k - 1) & \vdots & k\lambda_d - (k - 1)
+\end{pmatrix},
+\end{equation}
+然后矩阵 $\bfA$ 每一列做累乘运算，并左乘一个以 $\bfP$ 为对角线的对角矩阵，可以得
+到：
+
+\begin{equation}\label{eq:B}
+\bfB = \mathrm{diag}(\bfP)
+\begin{pmatrix}
+1 & 1 & \cdots & 1 \\
+k\lambda_0 & k\lambda_1 & \cdots & k\lambda_d\\
+\prod_{j=0}^{1}(k\lambda_0 - j) & \prod_{j=0}^{1}(k\lambda_1 - j)
+& \cdots & \prod_{j=0}^{1}(k\lambda_d - j) \\
+\vdots & \vdots & \ddots & \vdots \\
+\prod_{j=0}^{k-1}(k\lambda_0 - j) & \prod_{j=0}^{k-1}(k\lambda_1 - j) & \cdots & \prod_{j=0}^{k-1}(k\lambda_d - j) 
+\end{pmatrix}
+\end{equation}
+注意到矩阵 $\bfB$ 含有公式 \eqref{eq:phi0} 中的所有可能的基础模块，且有 
+\begin{equation*}
+    \phi_\alpha = \prod_{i=0}^d\bfB_{m_i, i}
+\end{equation*}
+其中 $m_i$ 是 $\bfm_\alpha$ 的第 $i$ 分量。
+
+下面讨论 $\nabla \phi_\alpha$ 的面向数组计算问题。利用函数乘积的求导法则，可得   
+\begin{equation*}
+    \nabla \prod_{j = 0}^{m_i - 1} (k\lambda_i - j)
+    = k\sum_{j=0}^{m_i - 1}\prod_{0\le l \le m_i-1, l\not= j}(k\lambda_i -
+    l)\nabla \lambda_i.
+\end{equation*}
+$$
+\bfD^i = 
+\begin{pmatrix}
+k & k\lambda_i & \cdots & k\lambda_i \\
+k\lambda_i - 1 & k & \cdots & k\lambda_i - 1 \\
+\vdots & \vdots & \ddots & \vdots \\
+k\lambda_i - (k-1) & k\lambda_i - (k-1) & \cdots & k 
+\end{pmatrix}
+, \quad 0 \le i \le d, 
+$$
+则可得到矩阵 $\bfD$，其元素为 
+$$
+\bfD_{i,j} = \sum_{m=0}^j\prod_{k=0}^j D^i_{k, m},\quad 0 \le i \le d,
+, 0 \le j \le k-1.
+$$
+最后，可以用如下的方式来计算 $\bfB$ 的梯度：
+\begin{equation*}
+\begin{aligned}
+\nabla \bfB = & \mathrm{diag}(\bfP)
+\begin{pmatrix}
+0 & 0 & \cdots & 0 \\
+\bfD_{0,0} \nabla \lambda_0 & 
+\bfD_{1,0} \nabla \lambda_1 & \cdots& 
+\bfD_{d,0} \nabla \lambda_d \\
+\vdots & \vdots & \ddots & \vdots \\
+\bfD_{0, k-1} \nabla \lambda_0 &
+\bfD_{1, k-1} \nabla \lambda_1 & \cdots &
+\bfD_{d, k-1} \nabla \lambda_d 
+\end{pmatrix}\\
+= & \mathrm{diag}(\bfP)
+\begin{pmatrix}
+\mathbf 0\\
+\bfD
+\end{pmatrix}
+\begin{pmatrix}
+\nabla \lambda_0 &  &  & \\
+ & \nabla \lambda_1 & & \\
+ & & \ddots & \\
+ & & & \nabla \lambda_d
+\end{pmatrix}\\
+= & \bfF 
+\begin{pmatrix}
+\nabla \lambda_0 &  &  & \\
+ & \nabla \lambda_1 & & \\
+ & & \ddots & \\
+ & & & \nabla \lambda_d
+\end{pmatrix},
+\end{aligned}
+\end{equation*}
+其中
+\begin{equation}\label{eq:F}
+    \bfF = \mathrm{diag}(\bfP)
+\begin{pmatrix} 
+    \mathbf 0\\ \bfD
+\end{pmatrix}.
+\end{equation}
+注意，上面公式中的 $\nabla \lambda_i$ 要看成一个整体。
+
+\subsection{区间 $ [x_0, x_1] $ 单元上的基函数构造}
+
+给定区间单元上的一个重心坐标 $(\lambda_0, \lambda_1)$, 存在
+$ x \in [x_0, x_1]$, 使得：
+
+\[
+\lambda_0 := \frac{x_1 - x}{x_1 - x_0}, \quad
+\lambda_1 := \frac{x  - x_0}{x_1 - x_0}
+\]
+
+显然 
+
+\[
+\lambda_0 + \lambda_1 = 1
+\]
+
+重心坐标关于$ x $ 的导数为：
+
+\[
+\frac{\mathrm d \lambda_0}{\mathrm d x} = -\frac{1}{x_1 - x_0},\quad
+\frac{\mathrm d \lambda_1}{\mathrm d x} = \frac{1}{x_1 - x_0}
+\]
+
+区间 $[x_0, x_1]$ 上的个 $ k\geq 1 $ 次基函数共有 
+
+\[
+n_{dof} = k+1,
+\]
+
+其计算公式如下:
+
+\[
+\phi_{m,n} = \frac{p^p}{m!n!}\prod_{l_0 = 0}^{m - 1}
+(\lambda_0 - \frac{l_0}{p}) \prod_{l_1 = 0}^{n-1}(\lambda_1 -
+\frac{l_1}{p}).
+\]
+
+其中 $ m\geq 0$, $ n\geq 0 $, 且 $ m+n=p $, 这里规定:
+
+\[
+ \prod_{l_i=0}^{-1}(\lambda_i - \frac{l_i}{p}) := 1,\quad i=0, 1
+\]
+
+$ p $ 次基函数的面向数组的计算
+构造向量： 
+
+\[
+P = ( \frac{1}{0!},  \frac{1}{1!}, \frac{1}{2!}, \cdots, \frac{1}{k!})
+\]
+
+构造矩阵： 
+
+\[
+A :=
+\begin{pmatrix}
+1  &  1  \\
+\lambda_0 & \lambda_1\\
+\lambda_0 - \frac{1}{k} & \lambda_1 - \frac{1}{k}\\
+\vdots & \vdots \\
+\lambda_0 - \frac{k - 1}{k} & \lambda_1 - \frac{k - 1}{k}
+\end{pmatrix}
+\]
+
+对 $ A $ 的每一列做累乘运算, 并左乘由 \(P\) 形成的对角矩阵, 得矩阵:
+
+\[
+B = \mathrm{diag}(P)
+\begin{pmatrix}
+1 & 1\\
+\lambda_0 & \lambda_1\\
+\prod_{l=0}^{1}(\lambda_0 - \frac{l}{p}) & \prod_{l=0}^{1}(\lambda_1 - \frac{l}{p})\\
+\vdots & \vdots \\
+\prod_{l=0}^{p-1}(\lambda_0 - \frac{l}{p}) & \prod_{l=0}^{p-1}(\lambda_1 - \frac{l}{p})
+\end{pmatrix}
+\]
+
+易知, 只需从 \(B\) 的每一列中各选择一项相乘(要求二项次数之和为 \(p\)),
+再乘以 \(p^p\) 即可得到相应的基函数, 其中取法共有
+
+\[
+n_{dof} = {p+1}
+\]
+
+构造指标矩阵：
+
+\[
+I = \begin{pmatrix}
+p  & 0 \\ p-1 & 1 \\ \vdots & \vdots \\ 0 & p
+\end{pmatrix}
+\]
+
+则 \(p+1\) 个 \(p\) 次基函数可写成如下形式
+
+\[
+\phi_i = p^pB_{I_{i,0}, 0}B_{I_{i, 1},1}, \quad i = 0, 1, \cdots, n_{dof}
+\]
+
+\section{全局自由度编号算法}
+
+给定一个正整数 $NN$ 和小于 $NN$ 的三个从小到大排列的正整数 $i$, $j$, 和 $k$, 即
+$0 \leq i < j < k < NN$, 以及三个不大于正整数 $n$ 的正整数 $m_i$, $m_j$ 和
+$m_k$, 满足 $m_i + m_j + m_k = n$, 请问是否存在另一组整数 $i'$, $j'$, 和 $k'$, 满
+足 $0 \leq i' < j' < k' < NN$,  及 $m_i'$, $m_j'$, $m_k'$, 满足 $m_i' + m_j' +
+m_k' = n$, 使得 
+$$ 
+i'm_i'2^0 + j'm_j'2^1 + k'm_k'2^2 = im_i2^0 + jm_j2^1 + km_k2^2 
+$$ 
+成立.
+
+
+
+
+
+
+
+
+
+\bibliographystyle{abbrv}
+\bibliography{ref}
+\end{document}

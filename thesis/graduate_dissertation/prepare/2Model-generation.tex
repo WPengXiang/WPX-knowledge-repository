@@ -1,0 +1,102 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\begin{document}
+\title{液滴模型建立}
+\author{王鹏祥}
+\date{2019.7.１４}
+\maketitle
+
+		\section{preface}
+		这星期因为老师回来了，所以把之前对变分问题的建立给整理了一下。
+		\section{水滴模型}
+		\begin{equation*}
+		F=\gamma_{LV} A_{LV}+(\gamma_{SL}-\gamma_{SV})A_{SL}
+		\end{equation*}
+		其中$\gamma_{LV}, \gamma_{SL},\gamma_{SV}$分别代表的是液—气，固—液，固—气表面之间的张力。 $A_{LV},A_{SL}$表示的是液—气，固—液之间的接触面积。F为最小表面自由能能量泛函。
+        
+        原式可变为
+        \begin{equation*}
+        F=\gamma_{LV} A_{LV}+\cos \theta A_{SL}\gamma_{LV}
+        \end{equation*}
+        $\theta$为接触角，对于给定的材料系统而言，是一个固定值
+\begin{figure}[H]
+	\centering
+	\includegraphics[height=6.0cm,width=9.5cm]{figures/2-1.png}
+	\caption{半圆内表示液体，阴影表示固体，半圆外表示气体}
+\end{figure}
+
+\section{二维变分问题建立}
+如图1建立坐标系，液滴与y轴交点为(0,h),与x轴交点为(-a,0),(a,0),曲线方程为y=f(x)。
+
+那么$A_{LV}$为一条弧线，其数值为$\int^{a}_{-a} \sqrt{1+y'}dx$
+
+$A_{SL}$为一条直线，长度为2a
+
+液滴的面积为固定值$\int_{-a}^{a}ydx$
+
+原方程变为
+\begin{equation*}
+\varPi=\gamma_{LV} \int^{a}_{-a} \sqrt{1+y'}dx - 2a\cos \theta \gamma_{LV}
+\end{equation*}
+
+约束条件为
+\begin{equation*}
+\left\{
+\begin{aligned}
+y(-a)    & =  0 \\
+y(a)     & =  0 \\
+\oint ds & =  \int_{-a}^{a}ydx = V
+\end{aligned}
+\right.
+\end{equation*}
+
+其变分问题可以描述为，找出一个y，使得在给定面积条件下，使得液滴的自由能达到最小
+\begin{equation}
+\varPi=\gamma_{LV} \int^{a}_{-a} \sqrt{1+y'(t)}x'(t)dt - 2a\cos \theta \gamma_{LV}+\lambda(\int_{-a}^{a}y(t)x'(t)dt-V)
+\end{equation}
+
+\section{三维变分问题建立}
+$A_{LV}$为一个近似于半球的的表面积，可看成曲线f(x)绕y轴转一圈所形成的的图形，其数值为$\int^{h}_{0} 2\pi x \sqrt{1+y'}dy$
+
+$A_{SL}$为半径为a的圆的面积$\pi a^{2}$
+
+液滴的体积为固定值$\int_{0}^{h}\pi x^{2}dx$
+
+原方程变为
+\begin{equation*}
+\varPi=\gamma_{LV} \int^{h}_{0} 2\pi x \sqrt{1+y'}dy - \pi a^{2}\gamma_{LV}\cos \theta 
+\end{equation*}
+约束条件为
+\begin{equation*}
+\left\{
+\begin{aligned}
+y(-a)    & =  0 \\
+y(a)     & =  0 \\
+y(0)     & =  h \\
+\oint ds & =  \int_{0}^{h}\pi x^{2}dx = V
+\end{aligned}
+\right.
+\end{equation*}
+其变分问题可以描述为，找出一个y，使得在给定体积条件下，使得液滴的自由能达到最小
+\begin{equation}
+\varPi=\gamma_{LV} \int^{h}_{0} 2\pi x \sqrt{1+y'}dy - \pi a^{2}\gamma_{LV}\cos \theta +\lambda(\int_{0}^{h}\pi x^{2}dx-V)
+\end{equation}
+
+\subsection{对二维问题的变分求解}
+通过变分公式
+\begin{equation*}
+\begin{aligned} \delta \Pi &=\prod(y+\delta y)-\prod(y) \\ &=\int_{\alpha}^{\beta}\left\{F\left(x, y+\delta y, y^{\prime}+\delta y^{\prime}\right)-F\left(x, y, y^{\prime}\right)\right\} \mathrm{d} x \end{aligned}
+\end{equation*}
+将(1)式进行变分
+\begin{align*}
+\delta \Pi=&\gamma_{LV}(\int_{0}^{\alpha}\sqrt{1+\left(y^{\prime}(t)+\delta y^{\prime}(t)\right)^{2}} x'(t)\mathrm{d} t-\int_{0}^{\alpha}\sqrt{1+y^{\prime 2}(t)} x'(t)\mathrm{d} t) - 2a\cos \theta \gamma_{LV}\\&+\delta\lambda(\int_{-a}^{a}y(t)x'(t)dt-V)
+ +\pi\lambda(\int_{-a}^{a}\delta y(t)x'(t)dt)
+\end{align*}
+\section{体会}\setlength{\parindent}{2em}
+我也试着对(1)(2)式子进行泛函的变分，仔细看了那篇论文，但感觉论文里有好多东西是错的，有一些自己也没搞懂，依葫芦画瓢，对二维问题进行了变分，但是感觉不对，自己也计算往下计算了一下，但结果很明显的不对，估计是我自己的哪里推错了（可能一开始就错了）。那本书也继续往下看了一些，知道了很多算子，感觉微分几何中算子是真的多，符号真的多，又是方块又是三角的，很多依旧看不明白，只能理解个大概吧。
+
+\end{document} 

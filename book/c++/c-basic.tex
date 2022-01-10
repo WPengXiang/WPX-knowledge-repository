@@ -1,0 +1,187 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{c基础}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{基础}
+\textbf{创建c++程序的步骤}
+\begin{itemize}
+\item 使用文本编辑器创建源代码
+\item 使用编译器将源代码转换为目标文件
+\item 使用链接器链接目标文件和必要的库，生成可执行的程序
+\item 输入可执行文件的名称以运行它
+\end{itemize}
+
+\textbf{面向对象编程}
+\begin{itemize}
+\item 封装:c++支持创建用户定义的类型来封装属性，这种类型称为类。使用时候不需要知道工作原理。
+\item 继承和重用:可将新类型声明为现有类型的拓展，新子类称为集成了现有类型。
+\item 多态:用一样东西有多种形态
+\end{itemize}
+
+\textbf{程序的组成部分}
+\begin{itemize}
+\item 预处理:用\# 表示，include如果用的是<>，代表在标准位置寻找，“”代表在相对位置寻找
+\item 源代码行:每个程序必有返回整形的main()函数.通常程序返回0表示成功，返回其他数字表示出现了某种故障
+\end{itemize}
+
+\textbf{函数} \par
+程序从main（）函数开头开始，逐行执行源代码。函数由函数头和函数体组成,函数头包含
+\begin{itemize}
+\item 函数的返回类型:void可以不用return
+\item 函数名:不能包含空格,每个单词首字母大写
+\item 函数接受的参数:实参是穿进来的数据，收到的实参存储在形参中
+\end{itemize}
+\section{常量}
+当全局变量和局部变量的名字一样，在函数内局部变量的值会覆盖全局变量的值，局部变量不会自动初始化，全局变量会自动初始化。一个字节8位。定义常量最好用const，最好不要用预定义，编译器无法确定值是否合适。
+\begin{itemize}
+\item 整数常量
+\begin{itemize}
+\item 0x十六进制
+\item 0表示8进制
+\item 默认十进制
+\item 后缀U表示无符号
+\item 后缀L表示长整数
+\end{itemize}
+\item 浮点常量
+\begin{itemize}
+\item e或E表示指数
+\end{itemize}
+\item 字符常量
+\begin{itemize}
+\item $\setminus$ t 水平制表符
+\item $\setminus$ v 垂直制表符
+\item $\setminus$ f 换页
+\item $\setminus$ n 换行
+\end{itemize}
+\item 定义常量
+\begin{itemize}
+\item \# define identifier value 预处理,定义在所有函数外
+\item const type varible = value 定义在函数内
+\end{itemize}
+\end{itemize}
+
+\section{运算符}
+\begin{itemize}
+\item 数学运算符中/,只有含有浮点型时候出的结果才是浮点数，要是都是整数相除，出来的是被舍弃小数的整数。
+\item ++当放到变量前后是不一样的，放到前面先加到变量上再赋值，放到后面先赋值，再加到变量上。
+\item 注意=是赋值，==是判断是否相等返回布尔值
+\item 多层逻辑运算符最好加括号让程序变得更易读
+\end{itemize}
+
+\section{函数}
+\begin{itemize}
+\item 通常命名规则是除第一个单词，其他单词首字母大写
+\item 函数定义在main（）前面，则不需要声明,定义在后面需要声明一下
+\item 局部变量：函数内创建的变量为局部变量，函数执行完后，局部变量将会消失
+\item 全局变量：在函数（包括main）外定义的变量，在程序的任何地方都可以使用，尽量不要使用全局变量，出现问题难以查找
+\item 形参：对函数形参的修改不会影响调用它的函数内部的值，这成为{\red 按值传递}，这会创建每个实参的本地拷贝；形参可以设定默认值，如果某个形参没有默认值，那么按前面的任何形参都不能有默认值，如果摸个形参由默认值，那么他后面的都要有；可以在声明中给定默认参数。
+\item 函数return后的语句都不会执行
+\item 函数重载（多态）：c++可有多个同名函数，只要形参(数量、类型)不同就可以，不可以通过只修改返回值类型来重载函数。
+\item 内联函数：了解决程序中函数调用的效率问题，以空间代价换时间；声明时候加上inline，编译器不会创建该函数，而是将代码直接复制到代用他的地方，如果函数的语句比较短（1-5行），且使用频繁，这会减少程序调用的时间。内联函数内最好不要使用循环和开关语句
+\item 可通过auto定义函数类型，减少思考量，增加程序的灵活性。使用auto定义函数，必须将函数定义放在main前面.
+\end{itemize}
+
+\section{控制程序流程}
+\begin{itemize}
+\item do while：再循环语句末尾检查条件，至少会执行一次
+\item for循序：将设置计算器变量、检查计数器变量是都满足条件，修改计数器变量三步放到一起，比while更加方便。
+\item switch:case部分只能进行相等比较，不能进行关系运算和布尔运算;switch中总应该包含default部分;每个case都应该包含break，否则会继续运行下一个。
+\item countine跳过本次循环，进行下一次循环，break跳出循环体
+\item switch if比较：switch让检查同一个变量的多种可能取值更简单，比if-else更容易开发和调试，多个else考虑用switch。进行比较测试如a>b时候只能用if-else
+\item 如果循环体至少执行一次考虑do-while否则用while
+\item 无需每次循环都递增计算器变量时候用while
+\item foreach循环:for(int a:name)，冒号前放的是用于存储数组各个元素的变量，冒号后面放的是数组名。
+\end{itemize}
+
+\section{数组和字符串}
+数组是一系列类型相同的相关数据，可将数组视为一系列数据存储单元，其中每个存储单元都是数组的一个元素。
+\begin{itemize}
+\item 如果越界会将指定值存储到里第一元素开头16字节的地方，造成程序崩溃，{\red 注意不要越界}
+\item sizeof()：获得数组地址的长度
+\item char name[]="dadad",来初始化字符串，编译器会自动添加空字符
+\item cin.gitline:输入字符串，有三个参数(要赋予的量，读取字符个数，终止输入的分隔符)若省略第三个，默认为换行符。
+\item strncpy():将整个字符窜复制到指定缓冲区,两个参数，第一个为复制到的，第二个为被复制的,第三个为最多复制数。strcpy只有两个参数
+\item 
+\end{itemize}
+
+\section{类}
+\begin{itemize}
+\item class里所有成员变量和成员函数默认都是私有的
+\item 私有成员只能在其所属累的函数内访问，共有成员可以再任何地方访问
+\item 存取器：用于设置或获取私有成员变量值的函数
+\item 如果在class外定义函数，要使用::符号来定义
+\item 构造函数：职责为创造一个有效的对象，通常为初始化成员数据。构造函数与类同名切没有返回值,可以有参数；如果没有构造函数，编辑器提供默认构造函数（不执行任何操作）。
+\item 析构函数:~加类名，执行清理工作并释放分配给对象的内存，不接受参数，也不返回值。
+\item const成员函数:在参数括号后面加 const；代表该函数不可以修改任何类成员的值，否则会报错。
+\item 函数定义放在类声明中，函数将自动变成内联的。
+\end{itemize}
+
+\section{指针}
+\begin{itemize}
+\item 指针:存储内存地址的特殊变量
+\item 一定要初始化指针，若不知道指向什么可以=nullptr（或者=0，=NULL），其表示不指向任何东西的空指针.
+\item 给指针传值的时候要加\& 符号。
+\item 使用指针来访问变量的值用*，称为间接访问  
+\item 指针的常用作用：管理堆中的数据，访问类的成员数据和成员函数，按引用将变量传递给函数
+\item 5个内存区域
+	\begin{itemize}
+	\item 全局名称空间：全局变量
+	\item 堆：自由存储区,不知道放在什么地方，但知道如何获取，程序结束时才会清理堆，在释放前都可以使用。
+	\item 栈：局部变量和函数参数，每当函数返回时
+	\item 代码空间:代码
+	\item 寄存器：内部管理如跟踪栈顶和指令指针
+	\end{itemize}
+\item 使用关键字new并在后面指定要位置分配内存的对象类型，可以分配堆中的内存，其返回一个内存地址，必须将赋给指针。
+\item 使用delete将释放指针指向的内存，将内存归还给堆，删除指针后最好在将其设置为nullptr，若果使用两次delete会使得程序需崩溃。
+\item 使用指针时候瑶始终确保其有值，使用nullptr来定义空指针比0和NULL更好
+\end{itemize}
+
+\section{高级指针}
+\begin{itemize}
+\item 可以创建自己定义类的指针，使用delete是将调用析构函数，使用new将调用不接受任何参数的构造函数。程序结束的是时候也将调用析构函数。
+\item 
+\end{itemize}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,405 @@
+
+% !Mode:: "TeX:UTF-8"
+\documentclass{beamer}
+
+\usetheme{Darmstadt}
+\useinnertheme{rounded}
+
+\usecolortheme{beaver}
+%\usecolortheme{albatross}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+%\usecolortheme{default}
+
+\usepackage{graphicx}
+\usepackage{pythonhighlight}
+\setbeamerfont*{frametitle}{size=\normalsize,series=\bfseries}
+\setbeamertemplate{navigation symbols}{}
+
+\input{../../../en_preamble.tex}
+\input{../../../xecjk_preamble.tex}
+
+\usepackage{biblatex}
+\addbibresource{ref.bib}
+
+\usefonttheme[onlymath]{serif}
+\numberwithin{subsection}{section}
+%\usefonttheme[onlylarge]{structurebold}
+\setbeamercovered{transparent}
+
+\title{FEALPy 偏微分方程数值解程序设计与实现: {\bf 网格数据结构}}
+\author{魏华祎 \quad 李成新}
+\institute[XTU]{
+weihuayi@xtu.edu.cn\\
+\vspace{5pt}
+湘潭大学$\bullet$数学与计算科学学院\\
+}
+ 
+\date[XTU]
+{
+    \today
+}
+
+ 
+
+\AtBeginSection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsection] 
+  }
+}
+
+\AtBeginSubsection[]
+{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsection] 
+  }
+}
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+
+\section{FEALPy 中的网格模块}
+
+\begin{frame}[fragile]{FEALPy 中的网格模块}
+    在偏微分方程数值计算程序设计中，网格是最核心的数据结构，是下一步实现数值离散方法
+    的基础。FEALPy 中核心网格数据结构是用{\bf 数组}表示。
+\begin{itemize}
+    \item[$\bullet$] 三角形、四边形、四面体和六面体等网格，因为每个单元顶点的个
+        数固定，因此可以用{\bf 节点坐标数组} node 和{\bf 单元拓扑数组} cell 来表
+        示，这是一种以{\bf 单元为中心的数据结构}。
+    \item[$\bullet$] 其它的如{\bf 边数组} edge、{\bf 面数组} face 都可由 cell 生
+        成。
+    \item[$\bullet$] FEALPy 中把 node、edge、face 和 cell 统称为网格中的实体 entity。
+    \item[$\bullet$] 在二维情形下，FEALPy 中的 edge 和 face 意义是相同的。
+    \item[$\bullet$] FEALPy 中还有一种以{\bf 边中心的网格数据结构}， 称为{\bf 半边数
+    据结构（Half-Edge data structure)}，它具有更灵活和强大的网格表达能力。
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{FEALPy 网格模块中的网格对象}
+\begin{table}[H]
+    \tiny
+\begin{tabular}[c]{|c|c|}\hline
+        IntervalMesh      & 区间网格        \\\hline
+		TriangleMesh      & 三角形网格       \\\hline
+		QuadrangleMesh    & 四边形网格       \\\hline
+		TetrahedronMesh   & 四面体网格       \\\hline
+		HexahedronMesh    & 六面体网格       \\\hline
+		PolygonMesh       & 多边形网格       \\\hline
+		PolyhedronMesh    & 多面体网格       \\\hline
+		StructureQuadMesh & 结构四边形网格   \\\hline
+		StructureHexMesh  & 结构六面体网格   \\\hline
+		Tritree           & 三角形树结构网格 \\\hline
+		Quadtree          & 四叉树           \\\hline
+		OCtree            & 八叉树           \\\hline
+        HalfEdgeMesh2d    & 二维半边网格     \\\hline
+        HalfEdgeMesh3d    & 三维半边网格     \\\hline
+\end{tabular}
+\caption{FEALPy 中的网格类。}
+\end{table}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{FEALPy 中网格示例：三角形}
+\begin{onlyenv}<1>
+	\begin{listing}[H]
+	 \tiny
+     \caption{创建一个三角形网格。}
+	 \begin{pythoncode}
+import numpy as np
+from fealpy.mesh import TriangleMesh
+
+node = np.array([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)],dtype=np.float)
+cell = np.array([(1, 2, 0), (3, 0, 2)], dtype=np.int)
+
+mesh = TriangleMesh(node, cell)
+mesh.uniform_refine(n=3)
+
+node = mesh.entity('node')
+edge = mesh.entity('edge')
+cell = mesh.entity('cell')
+
+fig = plt.figure()
+axes = fig.gca()
+mesh.add_plot(axes)
+mesh.find_node(axes, showindex=True)
+mesh.find_cell(axes, showindex=True)
+plt.show()
+	 \end{pythoncode}     
+	\end{listing}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{figure}[H]
+	\begin{minipage}[t]{0.49\linewidth}
+	\centering
+    \includegraphics[scale=0.35]{./figures/Tri1.png}
+    \caption{初始三角形网格。}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.49\linewidth}
+	\centering
+    \includegraphics[scale=0.35]{./figures/Tri2.png}
+    \caption{一致加密 2 次三角形网格。}
+	\end{minipage}	
+\end{figure}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{FEALPy 中网格示例：四边形}
+\begin{onlyenv}<1>
+	\begin{listing}[H]
+	 \tiny
+     \caption{创建一个四边形网格。}
+	 \begin{pythoncode}
+import numpy as np
+from fealpy.mesh import QuadrangleMesh
+
+node = np.array([(0,0),(1,0), (1,1),(0,1)],dtype=np.float)
+cell = np.array([(0,1,2,3)],dtype = np.int)
+
+mesh = QuadrangleMesh(node,cell)
+mesh.uniform_refine(2)
+
+node = mesh.entity('node')
+edge = mesh.entity('edge')
+cell = mesh.entity('cell')
+
+fig = plt.figure()
+axes = fig.gca()
+mesh.add_plot(axes)
+mesh.find_node(axes, showindex=True)
+mesh.find_cell(axes, showindex=True)
+plt.show()
+	 \end{pythoncode}     
+	\end{listing}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{figure}[H]
+	\begin{minipage}[t]{0.49\linewidth}
+	\centering
+    \includegraphics[scale=0.35]{./figures/Q1.png}
+    \caption{初始四边形网格}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.49\linewidth}
+	\centering
+    \includegraphics[scale=0.35]{./figures/Q2.png}
+    \caption{一致加密2次四边形网格}
+	\end{minipage}	
+\end{figure}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{FEALPy 中网格示例：四边形}
+\begin{onlyenv}<1>
+	\begin{listing}[H]
+	 \tiny
+     \caption{创建一个半边数据结构网格。}
+	 \begin{pythoncode}
+import numpy as np
+import matplotlib.pyplot as plt
+from fealpy.mesh import PolygonMesh, HalfEdgeMesh2d 
+
+node = np.array([
+    (0.0, 0.0), (0.0, 1.0), (0.0, 2.0),
+    (1.0, 0.0), (1.0, 1.0), (1.0, 2.0),
+    (2.0, 0.0), (2.0, 1.0), (2.0, 2.0)], dtype=np.float)
+cell = np.array([0, 3, 4, 4, 1, 0,
+    1, 4, 5, 2, 3, 6, 7, 4, 4, 7, 8, 5], dtype=np.int)
+cellLocation = np.array([0, 3, 6, 10, 14, 18], dtype=np.int)
+
+mesh = PolygonMesh(node, cell, cellLocation)
+mesh = HalfEdgeMesh2d.from_mesh(mesh)
+
+mesh.uniform_refine(n=3)
+
+node = mesh.entity('node')
+edge = mesh.entity('edge')
+cell, cellLocation = mesh.entity('cell')
+halfedge = mesh.entity('halfedge')
+
+fig = plt.figure()
+axes = fig.gca()
+mesh.add_plot(axes)
+plt.show()
+	 \end{pythoncode}     
+	\end{listing}
+\end{onlyenv}
+
+\begin{onlyenv}<2>
+\begin{figure}[H]
+	\begin{minipage}[t]{0.49\linewidth}
+	\centering
+    \includegraphics[scale=0.35]{./figures/triquad.png}
+    \caption{初始多边形网格。}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.49\linewidth}
+	\centering
+    \includegraphics[scale=0.35]{./figures/triquadrefine.png}
+    \caption{一致加密 3 次多边形网格。}
+	\end{minipage}	
+\end{figure}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}
+    \frametitle{FEALPy 中网格对象的命名与接口约定}
+\begin{onlyenv}<1>
+    \begin{table}[H]
+    \scriptsize
+    \centering
+    \begin{tabular}{|l|l|}\hline
+        变量名 & 含义\\\hline
+        NN	& 节点的个数\\\hline
+        NC	& 单元的个数\\\hline
+        NE	& 边的个数\\\hline
+        NF	& 面的个数\\\hline
+        GD	& 空间维数\\\hline
+        TD	& 拓扑维数\\\hline
+        node& 节点数组，形状为 (NN, GD)\\\hline
+        cell& 单元数组，形状为 (NC, NCV)\\\hline
+        edge& 边数组，形状为 (NE, 2)\\\hline
+        face& 面数组，形状为 (NF, NFV)\\\hline
+        ds	& 网格的拓扑数据结构对象，所有的拓扑关系数据都由其管理和获取\\\hline
+    \end{tabular}
+    \caption{FEALPy 中网格对象数据成员（属性）的命名约定。}
+    \end{table}
+\end{onlyenv}
+
+\begin{onlyenv}<2>
+    \begin{table}[H]
+    \tiny
+    \centering
+    \begin{tabular}{|l|l|}\hline
+        成员函数名 &	功能\\\hline
+        mesh.geo\_dimension()&	获得网格的几何维数\\\hline
+        mesh.top\_dimension()&	获得网格的拓扑维数\\\hline
+        mesh.number\_of\_nodes()&	获得网格的节点个数\\\hline
+        mesh.number\_of\_cells()&	获得网格的单元个数\\\hline
+        mesh.number\_of\_edges()&	获得网格的边个数\\\hline
+        mesh.number\_of\_faces()&	获得网格的面的个数\\\hline
+        mesh.number\_of\_entities(etype)&	获得 etype 类型实体的个数\\\hline
+        mesh.entity(etype)&	获得 etype 类型的实体\\\hline
+        mesh.entity\_measure(etype)	& 获得 etype 类型的实体的测度\\\hline
+        mesh.entity\_barycenter(etype)&	获得 etype 类型的实体的重心\\\hline
+        mesh.integrator(i)&	获得该网格上的第 i 个积分公式\\\hline
+    \end{tabular}
+    \caption{网格对象的常用方法成员（属性）列表。表格中 etype 值可以是 0, 1, 2, 3 或者字符串 ‘cell’, ‘node’, ‘edge’, ‘face’。对于
+二维网格，etype 的值取 ‘face’ 和 ‘edge’ 是等价的，但不能取 3。}\label{tab:fun}
+\end{table}
+\end{onlyenv}
+
+\begin{onlyenv}<3>
+    \begin{table}[H]
+        \tiny
+        \centering
+        \begin{tabular}{|l|l|}\hline
+            成员函数名 & 功能\\\hline
+            cell2cell = mesh.ds.cell\_to\_cell(...) &单元与单元的邻接关系\\\hline
+            cell2face = mesh.ds.cell\_to\_face(...) &单元与面的邻接关系\\\hline
+            cell2edge = mesh.ds.cell\_to\_edge(...) &单元与边的邻接关系\\\hline
+            cell2node = mesh.ds.cell\_to\_node(...) &单元与节点的邻接关系\\\hline
+            face2cell = mesh.ds.face\_to\_cell(...) &面与单元的邻接关系\\\hline
+            face2face = mesh.ds.face\_to\_face(...) &面与面的邻接关系\\\hline
+            face2edge = mesh.ds.face\_to\_edge(...) &面与边的邻接关系\\\hline
+            face2node = mesh.ds.face\_to\_node(...) &面与节点的邻接关系\\\hline
+            edge2cell = mesh.ds.edge\_to\_cell(...) &边与单元的邻接关系\\\hline
+            edge2face = mesh.ds.edge\_to\_face(...) &边与面的邻接关系\\\hline
+            edge2edge = mesh.ds.edge\_to\_edge(...) &边与边的邻接关系\\\hline
+            edge2node = mesh.ds.edge\_to\_node(...) &边与节点的邻接关系\\\hline
+            node2cell = mesh.ds.node\_to\_cell(...) &节点与单元的邻接关\\\hline
+            node2face = mesh.ds.node\_to\_face(...) &节点与面的邻接关系\\\hline
+            node2edge = mesh.ds.node\_to\_edge(...) &节点与边的邻接关系\\\hline
+            node2node = mesh.ds.node\_to\_node(...) &节点与节点的邻接关系\\\hline
+        \end{tabular}
+        \caption{网格拓扑数据成员 ds 的方法成员。} 
+    \end{table}
+\end{onlyenv}
+\begin{onlyenv}<4>
+    \begin{table}[H]
+    \tiny
+    \centering
+    \begin{tabular}{|l|l|}\hline
+        成员函数名 & 功能\\\hline
+        isBdNode = mesh.ds.boundary\_node\_flag() &	一维逻辑数组，标记边界节点\\\hline
+        isBdEdge = mesh.ds.boundary\_edge\_flag() &	一维逻辑数组，标记边界边\\\hline
+        isBdFace = mesh.ds.boundary\_face\_flag() &	一维逻辑数组，标记边界面\\\hline
+        isBdCell = mesh.ds.boundary\_cell\_flag() &	一维逻辑数组，标记边界单元\\\hline
+        bdNodeIdx = mesh.ds.boundary\_node\_index() &一维整数数组，边界节点全局编号 \\\hline
+        bdEdgeIdx = mesh.ds.boundary\_edge\_index() &一维整数数组，边界边全局编号 \\\hline
+        bdFaceIdx = mesh.ds.boundary\_face\_index() &一维整数数组，边界面全局编号 \\\hline
+        bdCellIdx = mesh.ds.boundary\_cell\_index() &一维整数数组，边界单元全局编号 \\\hline
+    \end{tabular}
+    \caption{网格拓扑数据成员 ds 的方法成员。} \label{tab:ds}
+\end{table}
+\end{onlyenv}
+\end{frame}
+
+\section{FEALPy 中的网格生成示例}
+\begin{frame}[fragile]
+    \frametitle{ MeshFactory 模块}
+    FEALPy 的 mesh 模块提供了一个 MeshFactory 的子模块，用于生成各种类型的常见网
+    格，方便用户学习和使用 FEALPy。
+	\begin{listing}[H]
+	 \footnotesize
+     \caption{创建一个半边数据结构网格。}
+	 \begin{pythoncode}
+from fealpy.mesh import MeshFactory
+
+mf = MeshFactory()
+	 \end{pythoncode}     
+	\end{listing}
+\end{frame}
+
+\begin{frame}[fragile]
+		\frametitle{基于FEALPy 中的MeshFactory模块生成各种类型的常见网格}
+    FEALPy 的 mesh 模块提供了一个 MeshFactory 的子模块，用于生成各种类型的常见网
+    格，方便用户学习和使用 FEALPy。
+		\begin{listing}[H]
+		\scriptsize
+		\caption{ MeshFactory 模块的 boxmesh2d}
+        \begin{pythoncode}
+import matplotlib.pyplot as plt
+from mesh import MeshFactory
+mf = MeshFactory()
+box = [0, 1, 0, 1]
+mesh = mf.boxmesh2d(box, nx=4, ny=4, meshtype='tri') #三角形网格
+mesh = mf.boxmesh2d(box, nx=4, ny=4, meshtype='quad')#四边形网格
+mesh = mf.boxmesh2d(box, nx=4, ny=4, meshtype='poly')#多边形网格 
+mesh = mf.special_boxmesh2d(box, n=10, meshtype='fishbone')
+mesh = mf.special_boxmesh2d(box, n=10, meshtype='rice')
+mesh = mf.special_boxmesh2d(box, n=10, meshtype='cross')
+mesh = mf.special_boxmesh2d(box, n=10, meshtype='nonuniform')
+mesh = mf.unitcirclemesh(0.1, meshtype='tri')
+mesh = mf.unitcirclemesh(0.1, meshtype='poly')
+mesh = mf.triangle(box, h=0.1, meshtype='tri')
+mesh = mf.triangle(box, h=0.1, meshtype='poly')
+		\end{pythoncode}
+		\end{listing}
+\end{frame}
+
+\end{document}

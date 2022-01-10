@@ -1,0 +1,105 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\begin{document}
+\title{linux 学习}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{计算机概论}
+计算机五大单元：输入单元，输出单元，ｃｐｕ内部的控制单元和算数逻辑单元，内存
+
+进制不一样到时硬盘的表示容量（１０进制)和实际容量（２进制）不一样
+
+操作系统是用来管理所有硬件，像linux,windows这样的都是操作系统
+
+\section{Linux相关知识}
+linux是一套操作系统用来提供一整组接口来给软件程序员开发用。
+
+\subsection{linux特色}
+\begin{itemize}
+\item 自由和开放的使用和学习环境
+\item 配备需求廉价
+\item 内核(操作系统的核心，用于管理系统资源)功能强大而稳定
+\item 独立作业
+\end{itemize}
+
+\subsection{linux优点}
+\begin{itemize}
+\item 稳定的系统
+\item 免费或者少许费用
+\item 安全和漏洞的快速修补
+\item 多任务多用户
+\item 相对比较不消耗资源
+\end{itemize}
+
+\subsection{linux缺点}
+\begin{itemize}
+\item 没有特定的支持厂商
+\item 游戏的支持度不足
+\item 专业软件的支持度不足
+\end{itemize}
+
+\section{命令行}
+command  [-options]  parameter1  parameter2 ...
+
+指令 \qquad 选项  \qquad   参数(1) \qquad  参数(2)
+\begin{itemize}
+\item 一行命令中第一个输入的部分绝对是『命令(command)』或『可运行文件案』
+\item command 为命令的名称，例如变换路径的命令为 cd 等等； 
+\item 中刮号[]并不存在于实际的命令中，而加入选项配置时，通常选项前会带 - 号， 
+    例如 -h；有时候会使用选项的完整全名，则选项前带有 -- 符号，例如 --help； 
+\item parameter1 parameter2.. 为依附在选项后面的参数，或者是 command 的参数；  
+\item 命令, 选项, 参数等这几个咚咚中间以空格来区分，不论空几格 shell 都视为一格；  
+\item 按下[Enter]按键后，该命令就立即运行。[Enter]按键代表着一行命令的开始启动。 
+\item 命令太长的时候，可以使用反斜杠 ($\backslash$) 来跳脱[Enter]符号，使命令连续到下一行。 
+     注意！反斜杠后就立刻接特殊字符，才能跳脱！ 
+\item  在 Linux 系统中，英文大小写字母是不一样的。举例来说， cd 与 CD 并不同。 
+\end{itemize}
+在命令行里执行语句主要有两种情况，一种是会直接显示结果回到命令提示符等待下一个命令输入，另一个是进入命令的环境直到结束该命令才回到命令提示符的环境。
+
+\subsection{基础命令}
+\begin{itemize}
+\item reboot \\ 重启
+\item poweroff、halt、shutdown -h \\关机
+\item locate \\将所有与被查询的文件名相同的文件找出来
+\item whereis \\找到可执行命令的局对路径
+\item grep 关键字 文件名 \\查找制定文件总的特定字符串
+\item man\\显示某个命令的格式用法
+\end{itemize}
+
+\subsection{常用热键}
+\begin{itemize}
+\item Tab \\补全命令和文件补齐
+\item ctrl+c \\中断目前程序
+\item ctrl+d \\ 键盘输入结束(相当于输入exit)
+
+\end{itemize}
+
+\section{linux文件管理}
+\begin{itemize}
+\item cd切换目录，pwd显示当前目录，mkdir新建一个新的目录，rmdir删除一个空目录
+\item . 此层目录，..上一层目录，-前一个工作目录，$\~$ 目前用户所在的主文件夹
+\item rm -r删除目录下所有文件，*为通配符，-i互动删除会先询问
+\item ls -a列出全部文件包括隐藏文件，-d仅列出目录本身，-l列出长数据串（包括文件属性和权限）
+\item cp -s复制成快捷方式，-r递归的持续复制用于目录复制，-p连用文件的属性一起复制过去，-i若目标文件已经存在覆盖时会询问操作的进行，-d若源文件为接文件这复制链接文件属性，-a相当于-pdr
+\item mv -f若果目标已经不会询问直接覆盖，-i已经存在时会询问
+\item cat -n现实文档内容会列出行号空白行也会有行号
+\item tac 反向显示出内容
+\item more和less翻页查询内容
+\item whereis(寻找特定文件)或者which(寻找执行文件)或者locate(不分搜索)
+\item nautilus .打开当前文件夹
+\item echo snap >> ~/.hidden 将snap文件隐藏（就是在该目录下建立.hidden文本，在里边写上你要隐藏的文件即可）
+\item ln -s [要创建的文件或文件夹] [软链接存放位置] \\建立软连接
+\item ln [要创建的文件或文件夹] [软链接存放位置] \\建立硬连接
+\end{itemize} 
+
+%\cite{fem_2010}
+%\bibliographystyle{abbrv}
+%\bibliography{../../ref}
+
+\end{document}

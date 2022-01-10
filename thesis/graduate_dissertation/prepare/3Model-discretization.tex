@@ -1,0 +1,136 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\begin{document}
+\title{水滴模型离散化}
+\author{王鹏祥}
+\date{2019.9.26}
+\maketitle
+
+		\section{处理模型}
+\begin{figure}[H]
+	\centering
+	\includegraphics[height=6.0cm,width=9.5cm]{figures/2-1.png}
+	\caption{}\right) 
+	\label{fig:1}
+\end{figure}
+		\begin{equation}
+			G=A_{LV}-\cos\theta A_{SL}
+		\end{equation}
+		其中$A_{LV}$为液体和气体的接触面积，二维情况下曲线长度\\
+		$A_{SL}$为液体和固体的接触面积，二维情况下曲线长度\\
+		$\theta$为接触角，为一个常数。
+\section{离散化}\setlength{\parindent}{2em}
+	给定N+1个点$(x_{0},y_{0}),(x_{1},y_{1}),\cdots,(x_{N},y_{N})$，每一段参数曲线可表示为$p_{i}(t)=(X_{i}(t),Y_{i}(t))$
+	\begin{align}
+	X_{i}(t)=t, t \in [x_{i},x_{i+1}], i=0,1,\dots,N-1
+	\end{align}
+	
+    \begin{align}
+    Y_{i}(t)= \dfrac{t-x_{i+1}}{x_{i}-x_{i+1}}y_{i}+\dfrac{t-x_{i}}{x_{i+1}-x_{i}}y_{i+1},t \in [x_{i},x_{i+1}], i=0,1,\dots,N-1
+    \end{align}
+	
+	\begin{align}
+	X'_{i}(t)=1, t \in [x_{i},x_{i+1}],i=0,1,\dots,N-1
+	\end{align}
+	
+	\begin{align}
+	Y'_{i}(t)=\dfrac{y_{i}}{x_{i}-x_{i+1}}+\dfrac{y_{i+1}}{x_{i+1}-x_{i}}=\dfrac{y_{i+1}-y_{i}}{x_{i+1}-x_{i}},t \in [x_{i},x_{i+1}],i=0,1,\dots,N-1
+	\end{align}
+	
+	因此$ A_{SL},A_{LV}$可以表示为
+	\begin{align}
+	 A_{SL}=\sum_{i=0}^{N-1}\int_{x_{i_1}}^{x_{i}}1dt=x_{N}-x_{0}
+	\end{align}	
+	\begin{equation}
+	A_{LV}=\sum_{i=0}^{N-1}\int_{x_{i_1}}^{x_{i}}\sqrt{1+Y'_{i}(t)}dt=\sum_{i=0}^{N-1}\sqrt{(y_{i+1}-y_{i} )^2+(x_{i+1}-x_{i})^2}
+	\end{equation}
+	
+	约束面积S为：
+	\begin{align}
+	S=\sum_{i=0}^{N-1}\dfrac{(x_{i+1}-x_{i})(y_{i+1}+y_{i})}{2}=S_{0}
+	\end{align}
+	
+	约束条件为
+	\begin{align}
+	y_{0}=0,y_{N}=0
+	\end{align}
+	
+\section{离散化2}
+	给定在[0,T]上的N+1个点$(x_{0},y_{0}),(x_{1},y_{1}),\cdots,(x_{N},y_{N})$,每一段参数曲线可表示为$p_{i}(t)=(X_{i}(t),Y_{i}(t))$
+\begin{align}
+X_{i}(t)=(1-t)x_{i}+tx_{i+1}, t \in [0,1],i=0,1,\dots,N-1
+\end{align}
+
+\begin{align}
+Y_{i}(t)=(1-t)y_{i}+ty_{i+1}, t \in [0,1],i=0,1,\dots,N-1
+\end{align}
+
+\begin{align}
+X'_{i}(t)=x_{i+1}-x_{i},i=0,1,\dots,N-1
+\end{align}
+
+\begin{align}
+Y'_{i}(t)=y_{i+1}-y_{i},i=0,1,\dots,N-1
+\end{align}
+因此$ A_{SL},A_{LV}$可以表示为
+\begin{align}
+A_{SL}=\sum_{i=0}^{N-1}\int_{0}^{1}(x_{i+1}-x_{i})dt=x_{N}-x_{0}
+\end{align}	
+\begin{equation}
+A_{LV}=\sum_{i=0}^{N-1}\int_{0}^{1}\sqrt{(y_{i+1}-y_{i} )^2+(x_{i+1}-x_{i})^2}dt=\sum_{i=0}^{N-1}\sqrt{(y_{i+1}-y_{i} )^2+(x_{i+1}-x_{i})^2}
+\end{equation}
+
+	约束面积S为：
+\begin{align}
+S=\sum_{i=0}^{N-1}\dfrac{(x_{i+1}-x_{i})(y_{i+1}+y_{i})}{2}=S_{0}
+\end{align}
+
+约束条件为
+\begin{align}
+y_{0}=0,y_{N}=0
+\end{align}
+\setlength{\parindent}{2em}
+
+\section{能量函数梯度}
+\begin{align*}
+G &= A_{LV}-\cos\theta A_{SL} \\
+  &=\sum_{i=0}^{N-1}\sqrt{(y_{i+1}-y_{i} )^2+(x_{i+1}-x_{i})^2} - \cos \theta (x_{N}-x_{0})
+\end{align*}
+
+\begin{align*}
+G'(x_i) &= (\sqrt{(y_{i+1}-y_{i} )^2+(x_{i+1}-x_{i})^2} + \sqrt{(y_{i}-y_{i-1} )^2+(x_{i}-x_{i-1})^2}))'\\
+        &=   \frac{x_{i}-x_{i-1}}{h_{i-1}} - \frac{x_{i+1}-x_{i}}{h_{i}}\\
+G'(y_i) &= (\sqrt{(y_{i+1}-y_{i} )^2+(x_{i+1}-x_{i})^2} + \sqrt{(y_{i}-y_{i-1} )^2+(x_{i}-x_{i-1})^2}))'\\
+        &=   \frac{y_{i}-y_{i-1}}{h_{i-1}} - \frac{y_{i+1}-y_{i}}{h_{i}}\\
+\end{align*}
+
+\begin{align*}
+G'(x_0) &= (\sqrt{(y_{1}-y_{0}) )^2+(x_{1}-x_{0})^2})'-(\cos\theta(x_{N}-x_{0}))'\\
+         &= \frac{x_1-x_0}{h_0} + \cos\theta x_0\\
+G'(y_0) &= (\sqrt{(y_{1}-y_{0}) )^2+(x_{1}-x_{0})^2})'\\
+         &= \frac{y_1-y_0}{h_0}
+\end{align*}
+
+
+\begin{align*}
+G'(x_N) &= (\sqrt{(y_{N}-y_{N-1}) )^2+(x_{N}-x_{N-1})^2})'-(\cos\theta(x_{N}-x_{0}))'\\
+         &= \frac{x_N-x_{N-1}}{h_{N-1}} - \cos\theta x_N\\
+G'(y_N) &= (\sqrt{(y_{N}-y_{N-1}) )^2+(x_{N}-x_{N-1})^2})'\\
+         &= \frac{y_N-y_{N-1}}{h_{N-1}}
+\end{align*}
+
+
+
+\section{面积hessian}
+\begin{align*}
+S = \int_\Omega dx &= \frac{1}{2}\int_{\partial \Omega}<X,n>d\sigma\\
+                   &= \frac{1}{2}\sum_{i=0}^{N-1}(x_i(y_{i-1}-y_{i})+y_i(x_i-x_{i-1}))\\
+                   &=\frac{1}{2}\sum_{i=0}^{N-1}(x_i y_{i+1}- y_i x_{i+1})
+\end{align*}
+
+\end{CJK}
+\end{document} 

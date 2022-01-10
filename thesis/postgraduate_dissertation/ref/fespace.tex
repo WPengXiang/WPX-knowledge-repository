@@ -1,0 +1,337 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\begin{document}
+\title{有限元空间构造与实现}
+\author{魏华祎}
+\date{\chntoday}
+\maketitle
+\section{The Lagrange Element}
+
+\section{The Crouzeix-Raviart Element}
+
+\section{$H(\odiv)$ Finite Element}
+
+\subsection{The Raviart-Thomas Element}
+
+\subsubsection{三角形单元上的 $RT_k$ 元}
+记 $K$ 为一三角形单元, 三条边分别记为 $F_0$, $F_1$ 和 $F_2$, 设 $\bfm_k$ 是定义
+在 $K$ 上 $k$ 次缩放单项式空间的基函数向量组, 共有 $n_k:=(k+1)(k+2)/2$ 个函数组
+成. 进一步设 $\bff_{k}^F$ 为边 $F$ 上的 $k$ 次多项式空间基函数向量组, 共有 $k+1$
+个基函数, 则有单元 $K$ 和边 $F_i$ 上的 $k$ 次多项式空间可分别记为如下形式:
+
+\begin{align*}
+    \mbP_k(K) = \ospan\{\bfm_k\}\\
+    \mbP_k(F_i) = \ospan\{\bff_k^{F_i}\}
+\end{align*}
+
+三角形单元 $K$ 上的 $RT_k$ 元空间的维数是 $(k+1)(k+3)$, 它中的函数有如下的形式:  
+\begin{equation}
+    \bphi(\bfx) = \bPhi_{k}\bfc 
+\end{equation}
+其中
+\begin{align*}
+\bPhi_k &= 
+    \begin{bmatrix}
+        \bfM_k & [m_1, m_2]^T \bar\bfm_k\\ 
+    \end{bmatrix} \\
+\bfM_k &= 
+    \begin{bmatrix}
+        \bfm_{k} & \bfzero \\ 
+        \bfzero & \bfm_{k} 
+    \end{bmatrix},
+\end{align*}
+$\bar\bfm_k$ 是所有的 $k$ 次齐次缩放单项式基函数组成的函数向量.  $\bfc$ 是长度为
+$(k+1)(k+3)$ 的列向量, 其分量为任意一个常数.
+
+根据 $RT_k$ 元自由度的定义
+\begin{align*}
+    \int_{F_i} \bfp\cdot\bfn q\rmd\bfs, \forall q \in \mbP_k(F_i)\\
+    \int_K\bfp\cdot\bfq\rmd\bfx, \forall \bfq \in \mbP_k(K;\mbR^2)
+\end{align*}
+可以找到系数矩阵 $\bfC$, 满足 
+\begin{align*}
+    \bfG\bfC = \bfI
+\end{align*}
+其中 $\bfI$ 为 $(k+1)(k+3)$ 的单位矩阵, 
+\begin{align*}
+    \bfG = 
+    \begin{bmatrix}
+        n_{0}^{F_0} \int_{F_0} \left(\bff_{k}^{F_0}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{1}^{F_0} \int_{F_0} \left(\bff_{k}^{F_0}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_0} 
+        \left(n_{0}^{F_0}m_1 + n_{1}^{F_0} m_2\right)
+        \left(\bff_{k}^{F_0}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        n_{0}^{F_1} \int_{F_1} \left(\bff_{k}^{F_1}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{1}^{F_1} \int_{F_1} \left(\bff_{k}^{F_1}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_1} 
+        \left(n_{0}^{F_1}m_1 + n_{1}^{F_1}m_2\right)
+        \left(\bff_{k}^{F_1}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        n_{0}^{F_2} \int_{F_2} \left(\bff_{k}^{F_2}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{1}^{F_2} \int_{F_2} \left(\bff_{k}^{F_2}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_2} 
+        \left(n_{0}^{F_2}m_1 + n_{1}^{F_2}m_2\right)\left(\bff_{k}^{F_2}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        \int_{K} \bfm_{k-1}^T\bfm_{k}\rmd\bfx & \bfzero & 
+        \int_{K} m_1\bfm_{k-1}^T\bar\bfm_{k} \rmd\bfx \\ 
+        \bfzero & \int_{K} \bfm_{k-1}^T\bfm_{k}\rmd\bfx & \int_{K}
+        m_2\bfm_{k-1}^T\bar\bfm_{k} \rmd\bfx \\ 
+    \end{bmatrix}
+\end{align*}
+即
+$$
+\bPhi_k\bfC = \bPhi_k\bfG^{-1}
+$$
+就是 $RT_k(K)$ 中的一组基函数. 
+
+\subsubsection{四面体上的 $RT_k$ 元}
+记 $K$ 为一四面体单元, 四个面边分别记为 $F_0$, $F_1$, $F_2$ 和 $F_3$. 设 $\bfm_k$ 是定义
+在 $K$ 上 $k$ 次缩放单项式空间的基函数向量组, 共有 $n_k:=(k+1)(k+2)(k+3)/26$ 个函数组
+成. 进一步设 $\bff_{k}^F$ 为面 $F$ 上的 $k$ 次多项式空间基函数向量组,
+共有 $f_k = (k+1)(k+2)/2$ 个基函数.
+
+$$
+\bfM_k = 
+    \begin{bmatrix}
+        \bfm_{k} & \bfzero & \bfzero \\ 
+        \bfzero & \bfm_{k} & \bfzero \\
+        \bfzero & \bfzero & \bfm_{k}
+    \end{bmatrix} 
+$$
+
+$$
+\bPhi_k = 
+    \begin{bmatrix}
+        \bfM_k & [m_1, m_2, m_3]^T \bar\bfm_k\\ 
+    \end{bmatrix} 
+$$
+其中 $\bar\bfm_k$ 是 $\bfm_k$ 中所有的 $k$ 次齐次缩放单项式基函数向量.
+
+则 $K$ 上的 $RT_k$ 的基函数可以写成如下形式:
+\begin{equation}
+    \bphi(\bfx) = \bPhi_{k}\bfc 
+\end{equation}
+其中系数向量 $\bfc$ 是长度为
+$$
+n_c = 3*(k+1)(k+2)(k+3)/6 + (k+1)(k+2)/2 = (k+1)(k+2)(k+4)/2
+$$
+
+根据自由度的定义可得, 
+
+\begin{align*}
+    \begin{bmatrix}
+        n_{0}^{F_0} \int_{F_0} \left(\bff_{k}^{F_0}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{1}^{F_0} \int_{F_0} \left(\bff_{k}^{F_0}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{2}^{F_0} \int_{F_0} \left(\bff_{k}^{F_0}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_0} 
+        \left(n_{0}^{F_0}m_1 + n_{1}^{F_0} m_2 + n_{2}^{F_0} m_3\right)
+        \left(\bff_{k}^{F_0}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        n_{0}^{F_1} \int_{F_1} \left(\bff_{k}^{F_1}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{1}^{F_1} \int_{F_1} \left(\bff_{k}^{F_1}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{2}^{F_1} \int_{F_1} \left(\bff_{k}^{F_1}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_1} 
+        \left(n_{0}^{F_1}m_1 + n_{1}^{F_1}m_2 + n_{2}^{F_1}m_3\right)
+        \left(\bff_{k}^{F_1}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        n_{0}^{F_2} \int_{F_2} \left(\bff_{k}^{F_2}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{1}^{F_2} \int_{F_2} \left(\bff_{k}^{F_2}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{2}^{F_2} \int_{F_2} \left(\bff_{k}^{F_2}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_2} 
+        \left(n_{0}^{F_2}m_1 + n_{1}^{F_2}m_2 + n_{1}^{F_2}m_2\right)
+        \left(\bff_{k}^{F_2}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        n_{0}^{F_3} \int_{F_3} \left(\bff_{k}^{F_3}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{1}^{F_3} \int_{F_3} \left(\bff_{k}^{F_3}\right)^T\bfm_{k}\rmd\bfs & 
+        n_{2}^{F_3} \int_{F_3} \left(\bff_{k}^{F_3}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_3} 
+        \left(n_{0}^{F_3}m_1 + n_{1}^{F_3}m_2 + n_{1}^{F_3}m_2\right)
+        \left(\bff_{k}^{F_3}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        \int_{K} \bfm_{k-1}^T\bfm_{k}\rmd\bfx & \bfzero &  \bfzero & 
+        \int_{K} m_1\bfm_{k-1}^T\bar\bfm_{k} \rmd\bfx \\ 
+        \bfzero & \int_{K} \bfm_{k-1}^T\bfm_{k}\rmd\bfx & \bfzero & 
+        \int_{K} m_2\bfm_{k-1}^T\bar\bfm_{k} \rmd\bfx \\ 
+        \bfzero & \bfzero & \int_{K} \bfm_{k-1}^T\bfm_{k}\rmd\bfx &  
+        \int_{K} m_3\bfm_{k-1}^T\bar\bfm_{k} \rmd\bfx \\ 
+    \end{bmatrix}
+\end{align*}
+
+\section{$H(\ocurl)$ Finite Element}
+
+\subsection{三角形上的第一类 Nedelec 元}
+记 $K$ 为一三角形单元, 三条边分别记为 $F_0$, $F_1$ 和 $F_2$, 设 $\bfm_k$ 是定义
+在 $K$ 上 $k$ 次缩放单项式空间的基函数向量组, 共有 $n_k:=(k+1)(k+2)/2$ 个函数组
+成. 进一步设 $\bff_{k}^F$ 为边 $F$ 上的 $k$ 次多项式空间基函数向量组,
+共有 $k+1$ 个基函数.
+
+$$
+\bfM_k = 
+    \begin{bmatrix}
+        \bfm_{k} & \bfzero \\ 
+        \bfzero & \bfm_{k} 
+    \end{bmatrix} 
+$$
+
+$$
+\bPhi_k = 
+    \begin{bmatrix}
+        \bfM_k & [m_2, -m_1]^T \bar\bfm_k\\ 
+    \end{bmatrix} 
+$$
+其中 $\bar\bfm_k$ 是所有的 $k$ 次齐次缩放单项式基函数向量.
+
+$K$ 上的  $RT_k$ 的基函数可以写成如下形式:
+\begin{equation}
+    \bphi(\bfx) = \bPhi_{k}\bfc 
+\end{equation}
+其中 $\bfc$ 是长度为 $(k+1)(k+3)$ 的列向量.
+
+逆时针旋转边的法向 $\bft = [-n_1, n_0]^T$
+
+\begin{align*}
+    \begin{bmatrix}
+        t_{0}^{F_0} \int_{F_0} \left(\bff_{k}^{F_0}\right)^T\bfm_{k}\rmd\bfs & 
+        t_{1}^{F_0} \int_{F_0} \left(\bff_{k}^{F_0}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_0} 
+        \left(t_{0}^{F_0}m_2 - t_{1}^{F_0} m_1\right)
+        \left(\bff_{k}^{F_0}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        t_{0}^{F_1} \int_{F_1} \left(\bff_{k}^{F_1}\right)^T\bfm_{k}\rmd\bfs & 
+        t_{1}^{F_1} \int_{F_1} \left(\bff_{k}^{F_1}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_1} 
+        \left(t_{0}^{F_1}m_2 - t_{1}^{F_1}m_1\right)
+        \left(\bff_{k}^{F_1}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        t_{0}^{F_2} \int_{F_2} \left(\bff_{k}^{F_2}\right)^T\bfm_{k}\rmd\bfs & 
+        t_{1}^{F_2} \int_{F_2} \left(\bff_{k}^{F_2}\right)^T\bfm_{k}\rmd\bfs & 
+        \int_{F_2} 
+        \left(t_{0}^{F_2}m_2 - t_{1}^{F_2}m_1\right)\left(\bff_{k}^{F_2}\right)^T\bar\bfm_{k}\rmd\bfs \\ 
+        \int_{K} \bfm_{k-1}^T\bfm_{k}\rmd\bfx & \bfzero & 
+        \int_{K} m_2\bfm_{k-1}^T\bar\bfm_{k} \rmd\bfx \\ 
+        \bfzero & \int_{K} \bfm_{k-1}^T\bfm_{k}\rmd\bfx & 
+        -\int_{K} m_1\bfm_{k-1}^T\bar\bfm_{k} \rmd\bfx \\ 
+    \end{bmatrix}
+\end{align*}
+
+\subsection{四面体上的第一类 Nedelec 元}
+记 $K$ 为一四面体单元, 四个面 $\{F_i\}_{i=0}^3$，六条边的集 合为
+$\{E_j\}_{j=0}^{5}$. 设 $\bfm_k$ 是定义 在 $K$ 上 $k$ 次缩放单项式空间的基函数向
+量组, 共有 $n_k:=(k+1)(k+2)(k+3)/2$ 个函数组 成. 进一步设 $\bff_{k}^F$ 为面 $F$
+上的 $k$ 次多项式空间基函数向量组, 共有 $f_k = (k+1)(k+2)/2$ 个基函数.
+$\bfe_{k}^E$ 为边 $E$ 上的 $k$ 次多项式空间 的基函数向量组，共有 $e_k=k+1$ 个基
+函数组成．
+
+$$
+\bfM_k = 
+    \begin{bmatrix}
+        \bfm_{k} & \bfzero & \bfzero \\ 
+        \bfzero & \bfm_{k} & \bfzero \\
+        \bfzero & \bfzero & \bfm_{k}
+    \end{bmatrix} 
+$$
+
+$$
+\bPhi_k = 
+    \begin{bmatrix}
+        \bfM_k & [m_2, -m_1, 0]^T \bar\bfm_k & 
+       [m_3, 0, -m_1]^T \bar\bfm_k  &
+       [0, m_3, -m_2]^T \tilde \bfm_k \\ 
+    \end{bmatrix} 
+$$
+其中 $\bar\bfm_k$ 是 $\bfm_k$ 中所有的 $k$ 次齐次缩放单项式基函数向量, $\tilde
+\bfm_k$ 是不包含 $m_1 = (x - x_K)/h_K$ 所有 $k$ 次齐次缩放单项式基函数向量.
+
+
+\begin{equation}
+    \bphi(\bfx) = \bPhi_{k}\bfc 
+\end{equation}
+
+其中系数向量 $\bfc$ 是长度为
+$$
+3(k+1)(k+2)(k+3)/6 + 2(k+1)(k+2)/2 + (k+1) = (k+1)(k+2)(k+4)/2
+$$
+
+其自由度定义为
+\begin{align*}
+    \int_{E}\bfp\cdot\bft^{E}v\rmd\bfs, \forall v \in \mbP_k(E),\\
+    \int_{F}\bfp\times\bfn^{F}\cdot \bfv\rmd\bfs, \forall \bfv \in \mbP_{k-1}(F;\mbR^2),\\
+    \int_{K}\bfp\cdot\bfq\rmd\bfx, \forall \bfq \in \mbP_{k-2}(K;\mbR^3),\\
+\end{align*}
+
+\begin{align*}
+    \bfG = 
+    \begin{bmatrix}
+        \bfE_0 & \bfE_1 \\
+        \bfF_0 & \bfF_1 \\
+        \bfD_0 & \bfD_1 
+    \end{bmatrix}
+\end{align*}
+其中
+\begin{align*}
+    \bfE_0 &= 
+    \begin{bmatrix}
+        t_0^{E_0}\int_{E_0}
+        \left(
+        \bfe_k^{E_0}
+        \right)^T\bfm_k \rmd\bfs & 
+        t_1^{E_0}\int_{E_0}
+        \left(
+        \bfe_k^{E_0}
+        \right)^T\bfm_k \rmd\bfs & 
+        t_2^{E_0}\int_{E_0}
+        \left(
+        \bfe_k^{E_0}
+        \right)^T\bfm_k \rmd\bfs \\ 
+        \vdots & \vdots & \vdots \\
+        t_0^{E_5}\int_{E_5}
+        \left(
+        \bfe_k^{E_5}
+        \right)^T\bfm_k \rmd\bfs & 
+        t_1^{E_5}\int_{E_5}
+        \left(
+        \bfe_k^{E_5}
+        \right)^T\bfm_k \rmd\bfs & 
+        t_2^{E_5}\int_{E_5}
+        \left(
+        \bfe_k^{E_5}
+        \right)^T\bfm_k \rmd\bfs \\ 
+    \end{bmatrix} \\
+    \bfE_1 &= 
+    \begin{bmatrix}
+        \int_{E_0} 
+        \left(t_{0}^{E_0}m_2 - t_{1}^{E_0} m_1\right)
+        \left(\bff_{k}^{E_0}\right)^T\bar\bfm_{k}\rmd\bfs & 
+        \int_{E_0} 
+        \left(t_{0}^{E_0}m_3 - t_{2}^{E_0} m_1\right)
+        \left(\bff_{k}^{E_0}\right)^T\bar\bfm_{k}\rmd\bfs & 
+        \int_{E_0} 
+        \left(t_{1}^{E_0}m_3 - t_{2}^{E_0} m_2\right)
+        \left(\bff_{k}^{E_0}\right)^T\tilde\bfm_{k}\rmd\bfs \\ 
+        \vdots & \vdots & \vdots\\
+        \int_{E_5} 
+        \left(t_{0}^{E_5}m_2 - t_{1}^{E_5} m_1\right)
+        \left(\bff_{k}^{E_5}\right)^T\bar\bfm_{k}\rmd\bfs & 
+        \int_{E_5} 
+        \left(t_{0}^{E_5}m_3 - t_{2}^{E_5} m_1\right)
+        \left(\bff_{k}^{E_5}\right)^T\bar\bfm_{k}\rmd\bfs & 
+        \int_{E_5} 
+        \left(t_{1}^{E_5}m_3 - t_{2}^{E_5} m_2\right)
+        \left(\bff_{k}^{E_5}\right)^T\tilde\bfm_{k}\rmd\bfs \\ 
+    \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+    \bfM_k\times \bfn = 
+    \begin{bmatrix}
+           \bfzero &  n_2\bfm_k & -n_1\bfm_k\\
+        -n_2\bfm_k &   \bfzero  &  n_0\bfm_k\\
+         n_1\bfm_k & -n_0\bfm_k &  \bfzero
+    \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+    \bfF_0 = \\
+    \bfF_1 = 
+\end{align*}
+
+\subsection{三角形上的第二类 Nedelec 元}
+\subsection{四面体上的第二类 Nedelec 元}
+\cite{fealpy}
+\bibliographystyle{abbrv}
+\bibliography{ref}
+\end{document}

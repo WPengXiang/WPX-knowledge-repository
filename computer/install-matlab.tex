@@ -1,0 +1,133 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\begin{document}
+\title{ubuntu matlab 安装}
+\author{王栋}
+\date{\chntoday}
+\maketitle
+安装包链接：\verb+https://pan.baidu.com/s/14R19DoKnzN9PaCX_GMNmAw 密码：eb4t+
+
+首先要把两个ios镜像文件与Crack破解工具包下载下来,将其放在\verb+～/Downloads/MATLAB+下
+, 放在别的目录的话, 后面的指令作相应修改即可.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/1.png}
+\end{figure}
+
+然后进行安装, 进入放置文件目录, 鼠标右击\verb+R2018b_glnxa64_dvd1.iso+, 选择“用磁盘镜
+像挂载器打开”. 此时在桌面上出现挂载的镜像, 如图:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/2.png}
+\end{figure}
+
+这个磁盘镜像的位置在\verb+/media/用户名/MATHWORKS_R2018B+,我的是
+\verb+/media/wangdong/MATHWORKS_R2018B+.
+
+打开终端, 输入一下命令, 开始安装:
+
+\verb+sudo media/wangdong/MATHWORKS_R2018B/install+
+
+选择使用文件安装密钥, 下一步, 如图:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/3.png}
+\end{figure}
+接受许可协议, 下一步, 如图:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/4.png}
+\end{figure}
+选择已有许可证安装密钥, 输入密钥:09806-07443-53955-64350-21751-41297, 如图:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/5.png}
+\end{figure}
+选择安装目录, 这里默认,下一步:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/6.png}
+\end{figure}
+选择要安装的项目, 这里全选, 下一步:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/7.png}
+\end{figure}
+点击安装, 安装到50$\%$左右会提示: 弹出DVD1, 插入DVD2.此时先不要点确定, 先在桌面
+上右击之前挂载的镜像, 选择卸载, 然后挂载DVD2, 再点击提示中的确定, 会接着自动安
+装.再往后就点下一步, 完成即可.
+
+
+安装完成后, 点开Crack压缩包, 将R2018b和\verb+license_standalone.lic+提取到
+\verb+/Downloads/MATLAB+下:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/8.png}
+\end{figure}
+
+将\verb+license_standalone.lic+移动到安装目录下:
+
+\verb+ sudo cp -f ~/Downloads/MATLAB/license_standalone.lic/usr/local/MATLAB/R2018b+
+
+将解压的R2018b下的所有文件复制到安装目录下\verb+/usr/local/MATLAB/R2018b+
+
+\verb+ sudo cp -rf ~/Downloads/R2018b/* /usr/local/MATLAB/R2018b/+
+
+修改目录权限, 否则会出现许多warning:
+
+\verb+ sudo chmod -R 777 /usr/local/MATLAB/+
+
+运行matlab:
+
+\verb+ sh /usr/local/MATLAB/R2018b/bin/matlab+
+
+没有错误则成功.
+
+接下来创建快捷方式文件:
+
+\verb+sudo gedit /usr/share/applications/Matlab.desktop+
+
+在弹出的文本框里写入以下内容:
+\begin{verbatim}
+[Desktop Entry]
+Type=Application
+Name=Matlab 2018b
+GenericName=Matlab 2018b
+Exec=sh /usr/local/MATLAB/R2018b/bin/matlab -desktop
+Icon=/usr/local/MATLAB/R2018b/toolbox/shared/dastudio/resources/MatlabIcon.png
+Terminal=false
+Categories=Development;Matlab;
+\end{verbatim}
+
+在搜索栏中搜索matlab, 即可搜索到:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./figures/matlabinstall/9.png}
+\end{figure}
+
+\section{高分辨率屏幕调整}
+\verb+ >> s = settings;s.matlab.desktop.DisplayScaleFactor
+
+\verb+ >> s.matlab.desktop.DisplayScaleFactor.PersonalValue = 1.5
+
+
+\section{创建命令方便在任何终端都可以打开matlab}
+\verb+ cd /usr/local/bin
+
+\verb+ sudo ln -s /usr/local/MATLAB/R2018a/bin/matlab matlab
+
+
+
+
+
+
+
+
+%\cite{knupp2012introducing}
+%\bibliographystyle{abbrv}
+%\bibliography{ref}
+\end{document}

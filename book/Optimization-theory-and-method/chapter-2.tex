@@ -1,0 +1,163 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{一维有限元方法}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+\section{两点边值问题}
+\subsection{问题描述}
+\begin{align}
+	-u'' & = f, x \in I = [0, L] \\
+       u(0) & = u(L) = 0
+\end{align}
+
+由于很多微分方程的解析解很难求解甚至无法求解，因此我们需要用有限元的方法来求解数值解.
+
+这种问题可适用于热方程传导或者杆形变两种等多种物理模型中。
+
+\subsection{有限元求解推导}
+有限元方法的思路是把微分方程改写为一个变分方程，再把变分方程离散化，把无限的空间变为有限的空间。
+\subsubsection{变分公式}
+
+\begin{equation}
+\begin{aligned}
+\int_{0}^{L} f v d x &=-\int_{0}^{L} u^{\prime \prime} v d x \\
+&=\int_{0}^{L} u^{\prime} v^{\prime} d x-u^{\prime}(L) v(L)+u^{\prime}(0) v(0) \\
+&=\int_{0}^{L} u^{\prime} v^{\prime} d x
+\end{aligned}
+\end{equation}
+
+其中v被叫做检验函数，ｕ被叫做试探函数。
+
+ｖ所在的空间
+
+\begin{equation*}
+V_{0}=\left\{v:\|v\|_{L^{2}(I)}<\infty,\left\|v^{\prime}\right\|_{L^{2}(I)}<\infty, v(0)=v(L)=0\right\}
+\end{equation*}
+
+被叫做检验函数空间.
+
+u所在的空间
+
+\begin{equation*}
+V_{g_D}=\left\{v:\|v\|_{L^{2}(I)}<\infty,\left\|v^{\prime}\right\|_{L^{2}(I)}<\infty, v(0)=v(L)=g_D\right\}
+\end{equation*}
+
+被叫做试探函数空间(弱解所在的空间)
+
+在这个问题中由于边界值都为０，所一两个空间一样
+
+\subsubsection{将空间离散化(Galerkin method)}
+
+将无限的空间变为有限的.
+
+将函数空间离散化变为
+
+\begin{equation}
+V_{h, 0}=\left\{v \in V_{h}: v(0)=v(L)=0\right\}
+\end{equation}
+
+其中$V_{h}$为
+
+\begin{equation}
+V_{h}=\left\{v: v \in C^{0}(I),\left.v\right|_{I_{i}} \in P_{1}\left(I_{i}\right)\right\}
+\end{equation}
+
+那么离散形式为: 求解 $u_h \in V_{h,0}$, 使得
+
+\begin{equation}\label{1}
+\int_{I} u_{h}^{\prime} v^{\prime} d x=\int_{I} f v d x, \quad \forall v \in V_{h, 0}
+\end{equation}
+
+上述这种方法就叫做Galerkin方法。
+
+\subsubsection{基函数带入}
+
+之后我们讲$u_h \in V_{h,0}$的一组基函数带入\ref{1}中得到
+
+\begin{equation}
+\int_{I} u_{h}^{\prime} \varphi_{i}^{\prime} d x=\int_{I} f \varphi_{i} d x, \quad i=1,2, \ldots, n-1
+\end{equation}
+
+再讲$u_h$用基函数线性表出
+
+\begin{equation}
+u_{h}=\sum_{j=1}^{n-1} \xi_{j} \varphi_{j}
+\end{equation}
+
+其系数待定。
+
+最后都带入到\ref{1}中　
+
+\begin{equation}
+\begin{aligned}
+\int_{I} f \varphi_{i} d x &=\int_{I}\left(\sum_{j=1}^{n-1} \xi_{j} \varphi_{j}^{\prime}\right) \varphi_{i}^{\prime} d x \\
+&=\sum_{j=1}^{n-1} \xi_{j} \int_{I} \varphi_{j}^{\prime} \varphi_{i}^{\prime} d x, \quad i=1,2, \ldots, n-1
+\end{aligned}
+\end{equation}
+
+则写成矩阵形式为
+
+\begin{equation}
+	\begin{pmatrix}
+		(\varphi'_1, \varphi'_1) & (\varphi'_1, \varphi'_2) & \cdots & (\varphi'_1, \phi'_{n-1}) \\
+		(\varphi'_2, \varphi'_1) & (\varphi'_2, \varphi'_2) & \cdots & (\varphi'_2, \varphi'_{n-1}) \\
+		\vdots & \vdots & \cdots & \vdots \\
+	    (\varphi'_{n-1}, \varphi'_1) & (\varphi'_{n-1}, \varphi'_2) & \cdots & (\varphi'_{n-1}, \varphi'_{n-1}) \\
+	\end{pmatrix}
+	\begin{pmatrix}
+		\xi_1 \\
+		\xi_2 \\
+		\vdots \\
+		\xi_{n-1}
+	\end{pmatrix} 
+	= \begin{pmatrix}
+		(f_1, \varphi_1) \\
+		(f_2, \varphi_2) \\
+		\vdots \\
+		(f_{n-1}, \varphi_{n-1}) \\
+	\end{pmatrix}
+\end{equation}
+
+其中左端项第一个矩阵为刚度矩阵，右端项向量为载荷向量
+
+
+\subsection{误差分析}
+\begin{proposition}
+用有限元方法估计出的$u_h$满足如下公式
+
+\begin{equation}
+\int_{I}\left(u-u_{h}\right)^{\prime} v^{\prime} d x=0, \quad \forall v \in V_{h, 0}
+\end{equation}
+
+\begin{equation}
+\left\|\left(u-u_{h}\right)^{\prime}\right\|_{L^{2}(I)} \leq\left\|(u-v)^{\prime}\right\|_{L^{2}(i)}, \quad \forall v \in V_{h, 0}
+\end{equation}
+
+\begin{equation}
+\left\|\left(u-u_{h}\right)^{\prime}\right\|_{L^{2}(I)}^{2} \leq C \sum_{i=1}^{n} h_{i}^{2}\left\|u^{\prime \prime}\right\|_{L^{2}\left(I_{i}\right)}^{2}
+\end{equation}
+
+\end{proposition}
+
+先验误差和后验误差，区别在于一个是对ｕ的估计，一个是对$u_h$的估计
+
+\section{三种边界条件}
+三种边界条件主要是看$Ay+By'=C$的系数情况
+\begin{itemize}
+\item Diechlet边界条件(第一类边界条件)：A$\neq$0,B=0,即给出未知函数在边界上的数值
+
+\item Neumann边界条件(第二类边界条件)：A=0,B$\neq$0,即给出未知函数在边界外法线的方向导数
+
+\item Robin边界条件(第三类边界条件)：A$\neq$0,B$\neq$0,即给出未知函数在边界上的函数值和外法线的方向导数的线性组合
+\end{itemize}
+
+%\cite{fem_2010}
+%\bibliographystyle{abbrv}
+%\bibliography{../../ref}
+\end{document}

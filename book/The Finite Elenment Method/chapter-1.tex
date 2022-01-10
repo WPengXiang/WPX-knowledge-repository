@@ -1,0 +1,185 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{一维分段多项式的逼近}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+
+这章主要讲的是如何用插值和投影对多项式进行逼近, 和几种常用的数值积分公式
+\section{分片多项式空间(Piecewise Polynomial Space)}
+
+\subsection{线性多项式空间(Space of Linear Polynomials)}
+
+给定区间 $I = [x_0, x_1]$, 定义区间上的线性多项式空间
+
+\begin{equation}\label{1}
+    \mbP_1(I) = \{v: v(x) = c_0 + c_1x, x \in I, c_0, c_1 \in \mbR\}
+\end{equation}
+
+自由度就是看有几个变量， 具体来说就是看有几个系数， 线性多项式函数空间自由度就是２
+
+线性多项式空间常用的的基函数有两个, 单项式基(monomial basis)和结点基(nodal basis)
+\begin{itemize}
+	\item monomial basis:$ \{ 1,x \}$
+	\item nodal basis:$ \{ \frac{x_1 - x}{x_1 - x_0} , \frac{x - x_0}{x_1 - x_0} \}$
+\end{itemize}
+在结点基下函数值依赖于一个范德蒙行列式, 任意一个分段多项式空间里的元素都都可以被基线性表示， 一般常用结点基
+
+\subsection{连续的分片线性多项式空间(The Space of Countinue Piecewise Linear Polynomials)}
+
+把区间 $I = [0, L]$ 分成 $n$ 段, 设立n+1个结点(做剖分，变为网格)即
+
+\begin{equation*}
+    \mcI: 0 = x_0 < x_1 < x_2 < \cdots < x_{n-1} < x_n = L
+\end{equation*}
+
+并定义子区间 $I_i = [x_{i-1}, x_i], \, i = 1, 2, \cdots, n$,　区间长度固定 
+$h_i = x_i - x_{i-1}$.
+
+在网格 $\mcI$ 上, 定义连续分片线性多项式的空间 $\mbV_h$
+
+\begin{equation*}
+    \mbV_h = \{v: v\in C^0(I), v|_{I_i} \in \mbP_1(I_i)\}
+\end{equation*}
+
+其中 $C^0(I)$ 是区间 $I$ 上的连续函数空间, $\mbP_1(I_i)$ 是区间 $I_i$ 上的线性函数空间(\ref{1}).
+
+连续的分片线性多项式空间$\mbV_h$ 上的基为帽函数(hat functions) $\{\varphi_j\}_{j = 0}^n$,
+
+\begin{equation*}
+    \varphi_j(x_i) = \begin{cases}
+        1, \quad \text{if} \, i = j \\
+        0, \quad \text{if} \, i \ne j \\
+    \end{cases},
+    \quad i, j = 0, 1, \cdots, n
+\end{equation*}
+
+简言之就是函数在一个结点处的值为１在其他结点出都为０的线性函数. 这种想法很自然, 因为很显然连续分片多项式空间是由结点处的值所唯一确定. 更直观的表达为
+
+\begin{equation*}
+	\varphi_j(x_i) = \begin{cases}
+		\frac{x-x_{i-1}}{h_i}, & \quad \text{if}   x \in I_i \\
+		\frac{x_{i+1}-x}{h_{i+1}},& \quad \text{if}  x \in I_{i+1} \\
+		0, & \quad \text{otherwise}
+		\end{cases}
+\end{equation*}
+
+\section{逼近连续分片线性多项式空间的方法}
+\subsection{插值(Interpolation)}
+\subsubsection{线性插值(Liner Interpolation)}
+
+在区间 $I$ 上给定连续函数 $f$, 定义 $f$ 的线性插值函数为 $\pi f \in \mbP_1$ 
+
+\begin{equation*}
+    \pi f(x) = f(x_0)\varphi_0 + f(x_1)\varphi_1 
+\end{equation*}
+
+因此我们可以看出插值函数在结点处的值和原函数是一样的。
+
+测量两者之间的误差可以通过两种范数来测量：无穷范数 $\|v|\|_{ \infty } $和 $L^2(I)$ 范数
+
+$L^2(I)$ 范数是对函数整体上逼近程度好坏的一种度量,我们使用 $L^2(I)$ 范数测量插值误差
+
+\begin{proposition}\label{２}
+    插值误差满足下面估计
+    \begin{align*}
+        \|f- \pi_1 f\|_2 &\leq C h^2 \|f''\|_2 \\
+        \|(f - \pi_1 f)'\|_2 &\leq  C h \|f''\|_2 
+    \end{align*}
+    其中 C 是常数.
+\end{proposition}
+
+从中可以看出误差是依赖于插值函数和剖分单元长度.
+
+\subsubsection{连续的分片线性插值(Countinue Piecewise Liner Interpolation)}
+
+在网格 $\mcI$ 上定义连续的线性插值 $\pi f \in \mbV_h$ 
+
+\begin{equation}
+    \pi f(x) = \sum_{i=1}^{n} f(x_i) \varphi_i(x)
+\end{equation}
+
+其实就是讲一个函数分成很多段, 在每一段上用线性插值来逼近函数.
+
+我们使用 $L^2(I)$ 范数测量插值误差
+
+\begin{proposition}
+    插值误差满足下面估计
+    \begin{align*}
+        \|f- \pi_1 f\|^2_{L^2(I)} &\leq 
+        C \sum_{i=1}^n h_i^4 \|f''\|^2_{L^2(I_i)} \\
+        \|(f - \pi_1 f)'\|^2_{L^2(I)} &\leq
+        C \sum_{i=1}^n h_i^2 \|f''\|^2_{L^2(I_i)} 
+    \end{align*}
+\end{proposition}
+
+线性插值只适合光滑性比较好的函数, 若函数的二阶导的值很大的时候（就是函数图像凹凸很大时候),
+线性插值就不能对函数有效进行逼近，因此我们引入$L^2$ 投影.
+
+\subsection{$L^2$ 投影($L^2$Projection)}
+
+给定函数 $f \in L^{I}$, 则它的 $L^2$ 投影 $P_hf \in \mbV_h$ 为
+
+\begin{equation}
+    \int_I (f - P_hf)v \mathrm{d} x = 0, \quad \forall v \in \mbV_h
+\end{equation}
+
+即$ P_hf $为　$ f $在$ \mbV_h $上的投影，并且两者间的误差$ (f - P_hf) $要与$ \mbV_h $
+里任意向量正交
+
+由于上式对任意的 $v$ 成立, 因此可以用 $\mbV_h$ 中的基函数$  \varphi_i $代替 $v$. 即
+
+\begin{equation}\label{2}
+    \int_I (f - P_hf)\varphi_i \mathrm{d} x = 0, \quad i = 1, 2, \ldots, n.
+\end{equation}
+
+将$  P_hf $用基函数表示$ P_hf= \sum_{j=0}^n\xi_J\varphi_i $然后带入\ref{2}可推出线性方程组
+
+\begin{equation}
+\begin{aligned}
+\int_{I} f \varphi_{i} d x &=\int_{I}\left(\sum_{j=0}^{n} \xi_{j} \varphi_{j}\right) \varphi_{i} d x \\
+&=\sum_{j=0}^{n} \xi_{j} \int_{I} \varphi_{j} \varphi_{i} d x, \quad i=0,1, \ldots, n
+\end{aligned}
+\end{equation}
+
+定义
+\begin{itemize}
+\item 刚度矩阵(mass matrix):$ \int_{I}\varphi_{j} \varphi_{i} d x, \quad i=0,1, \ldots, n$
+\item 载荷向量(load vector):$  \int_{I} f \varphi_{i} d x $
+\end{itemize}
+
+\begin{proposition}
+
+$ P_{h} f $满足如下估计
+\begin{align*}
+\left\|f-P_{h} f\right\|_{L^{2}(I)}^{2} \leq C \sum_{i=1}^{n} h_{i}^{4}\left\|f^{\prime \prime}\right\|_{L^{2}\left(I_{i}\right)}^{2} \\
+\left\|f-P_{h} f\right\|_{L^{2}(I)} \leq\|f-v\|_{L^{2}(I)}, \quad \forall v \in V_{h}
+\end{align*}
+
+\end{proposition}
+
+最后$L^2$ 投影不适合对有很多震荡的函数来逼近。
+\section{常用数值积分公式}
+估计连续函数$f(x)$在区间$I = \left[x_0,x_1\right]$上的积分
+
+\begin{equation*}
+    J = \int_I f(x) dx
+\end{equation*}
+
+有以下几种方法
+\begin{itemize}
+\item 中间值公式: $ J \approx f(\frac{x_{0}+x_{1}}{2})h $
+\item 梯形公式: $ J \approx \frac{f(x_0)+f(x_1)}{2}h $
+\item Simpson's公式: $ J \approx \frac{f(x_0)+4f(\frac{x_{0}+x_{1}}{2})+f(x_1)}{6}h $
+\end{itemize}
+
+%\cite{fem_2010}
+%\bibliographystyle{abbrv}
+%\bibliography{../../ref}
+
+\end{document}

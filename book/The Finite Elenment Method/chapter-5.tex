@@ -1,0 +1,446 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\input{../../en_preamble.tex}
+\input{../../xecjk_preamble.tex}
+\begin{document}
+\title{时间依赖问题}
+\author{王鹏祥}
+\date{\chntoday}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{知识预备}
+
+\begin{theorem}[divergence therom]
+设 $\Omega$ 是 $\mbR^2$ 上的域, 边界为 $\partial\Omega$, 外单位法线为 $n$, 则有
+
+\begin{equation}
+\int_{\Omega} \frac{\partial f}{\partial x_{i}} d x=\int_{\partial \Omega} f n_{i} d s, \quad i=1,2
+\end{equation}
+
+其中$n_{i}$为ｎ在$x_i$上的分量
+    
+\end{theorem}
+
+由散度定理可以推导出格林定理
+
+\begin{theorem}[Green therom]
+
+\begin{equation}
+\int_{\Omega}-\Delta u v d x=\int_{\Omega} \nabla u \cdot \nabla v d x-\int_{\partial \Omega} n \cdot \nabla u v d s
+\end{equation}
+    
+其中uv为向量场函数
+\end{theorem}
+
+\section{Poisson方程的有限元方法}
+
+\subsection{possion方程}
+找到满足下列条件的ｕ
+
+\begin{equation}\label{1}
+    \begin{alignat}{2}
+        -\triangle u & =f,\qquad \text{in}\Omega \\
+        u & =0, \qquad \text{on}\partial\Omega
+    \end{alignat}
+\end{equation}
+
+其中ｆ为$\Omega$上的给定函数
+\subsection{等价变分方程推导}
+
+引入一类 Sobolev 空间：
+\begin{equation}
+\mbV^1(\Omega)=\left\{v:\|v\|_{L^{2}(\Omega)}+\|\nabla v\|_{L^{2}(\Omega)}<\infty\right\}
+\end{equation}
+两个基本要素
+
+\begin{itemize}
+	\item 试探函数空间 $u \in \mbV^1_{g_D}(\Omega) = \{u|u \in \mbV^1(\Omega)
+        , u|_{\Gamma} = g_D\}$
+    \item 检验函数空间 $v \in \mbV^1_0(\Omega) = \{v|v \in \mbV^1(\Omega) 
+        , u|_{\Gamma} = 0\}$
+\end{itemize}
+
+该问题两个空间一样。通过green定理问题转化为
+
+找出$u \in \mbV^1_{g_D}(\Omega)$使得下列方程成立
+\begin{equation}\label{2}
+\begin{aligned}
+\int_{\Omega} f v d x &=-\int_{\Omega} \Delta u v d x \\
+&=\int_{\Omega} \nabla u \cdot \nabla v d x-\int_{\partial \Omega} n \cdot \nabla u v d s \\
+&=\int_{\Omega} \nabla u \cdot \nabla v d x　 \quad \forall v \in \mbV^1_0(\Omega)
+\end{aligned}
+\end{equation}
+
+注意：尽管泊松方程的解$\ref{1}$也是变分公式的解$\ref{2}$，但反过来通常是不正确的。这是因为变分形式的解是不需要二次可微的，因此，变分形式有时被称为弱形式。
+
+
+\subsection{将空间离散}
+
+设$\mcK$是$\Omega$区域的一种三角划分，$V_h$ 是 $\mcK$ 上的连续分片线性空间.$V_{h,0}=\{v\in V_h:v|_{\partial\Omega}=0\}$.
+
+那么形式变为: 求解 $u_h \in \mbV_{h,0}$, 使得
+
+\begin{equation}\label{4}
+	\int_{\Omega} \nabla u_h\cdot \nabla v\mrd \bfx = \int_{\Omega} fv \mrd\bfx, \qquad \forall v\in V_{h,0}
+\end{equation}
+
+离散化：用$V_{h,0}$的基函数$\left\{\varphi_{i}\right\}_{i=1}^{n_{i}}$ 替代$V_{h,0}$，$u_h$也用这组基函数线性表处，便可以写成线性方程组的形式, 即
+
+\begin{equation}
+\begin{aligned}
+\int_{\Omega} f \varphi_{i} d x &=\int_{\Omega} \nabla u_{h} \cdot \nabla \varphi_{i} d x \\
+&=\int_{\Omega} \nabla\left(\sum_{j=1}^{n_{i}} \xi_{j} \varphi_{j}\right) \cdot \nabla \varphi_{i} d x \\
+&=\sum_{j=1}^{n_{i}} \xi_{j} \int_{\Omega} \nabla \varphi_{j} \cdot \nabla \varphi_{i} d x, \quad i=1,2, \ldots, n_{i}
+\end{aligned}
+\end{equation}
+
+可以简写为
+
+\begin{equation}
+b_{i}=\sum_{j=1}^{n_{i}} A_{i j} \xi_{j}, \quad i=1,2, \ldots, n_{i}
+\end{equation}
+
+其中
+
+\begin{equation}
+    \begin{aligned}
+        A_{i, j} & = \int_{\Omega} \nabla \varphi_i \cdot \varphi_j \mrd \bfx,
+        i, j = 1, 2, \cdots, n_i \\
+        b_i & = \int_{\Omega} f \varphi_i \mrd \bfx, i = 1,2, \cdots, n_i, \\
+    \end{aligned}
+\end{equation}
+
+用矩阵格式可以写为
+
+\begin{equation}
+\bfA \xi = \bfb
+\end{equation}
+
+其中$\bfA$为$n_i \times n_i$的刚度矩阵，$\bfb$为$n_i \times 1$的过载向量。 
+
+\section{常用不等式}
+
+\begin{theorem}[Poincar\'{e} Ineqality]
+
+    已知 $\Omega \subset \mbR^2$ 是有界区域. 
+    则有存在常数 $C = C(\Omega)$, 使得对 $\forall v \in \mbV_0$, 都有
+
+    \begin{equation}
+        \|v\|_{L^2(\Omega)} \le C \|\nabla v\|_{L^(\Omega)}
+    \end{equation}
+    
+\end{theorem}
+
+
+\begin{theorem}[Trace Ineqality]
+    已知 $\Omega \subset \mbR^2$ 是有界区域
+    并且边界 $\partial \Omega$ 是凸的光滑多边形. 
+    则有存在常数 $C = C(\Omega)$, 使得对 $\forall v \in \mbV$, 都有
+
+    \begin{equation}
+        \|v\|_{L^2(\partial \Omega)} \le C 
+        (\|v\|^2_{L^2(\Omega)} + \|\nabla v\|^2_{L^(\Omega)})^{\frac{1}{2}}
+    \end{equation}
+\end{theorem}
+
+
+\begin{theorem}[Elliptic Regularity]
+    已知 $\Omega \subset \mbR^2$ 是凸的有界区域. 
+    并且边界是凸, 光滑的多边形边界. 
+    则有存在常数 $C = C(\Omega)$, 使得对任意的足够光滑的函数 $v$, 在边界上都有
+    $v = 0$ 或 $\bfn \cdot \nabla v = 0$, 且
+
+    \begin{equation}
+        \|D^2 v\|_{L^2(\Omega)} \le C \|\Delta v\|_{L^(\Omega)}
+    \end{equation}
+
+    若 $\Omega$ 是凸区域, $0 < C \le 1$.否则, $C > 1$.
+\end{theorem}
+
+
+\begin{theorem}[Inverse Estimate]
+    在均匀 (quasi-uniform) 网格上, $\forall v \in \mbV_h$ 
+    都满足逆估计
+
+    \begin{equation}
+        \|\nabla v\|_{L^2(\Omega)} \le C h^{-1} \|v\|_{L^(\Omega)}
+    \end{equation}
+\end{theorem}
+
+\section{有限元的基本理论}
+
+\subsection{存在性和唯一性}
+\begin{theorem}
+    由式 (\ref{4}) 定义的有限元数值解 $u_h$ 存在且唯一. 
+\end{theorem}
+
+\subsection{先验误差}
+\begin{theorem}[Galerkin Orthogonality]
+    由式 (\ref{4})定义的有限元数值解 $u_h$ 满足正交性
+    \begin{equation}
+        \int_{\Omega} \nabla(u - u_h) \cdot \nabla v \mrd \bfx = 0, \forall v
+        \in \bfV_{h, 0}
+    \end{equation}
+\end{theorem}
+
+
+\begin{theorem}[最优估计]
+    由式 (\ref{4}) 定义的有限元数值解 $u_h$ 满足最优估计
+
+    \begin{equation}
+        |||u - u_h||| \le C |||\nabla v|||, \forall v \in \bfV_{h, 0}
+    \end{equation}
+
+    其中$|||v|||$为能量范数，定义为
+
+    \begin{equation}
+        |||v|||^2  = \int_{\Omega} \nabla v \cdot \nabla v \mrd \bfx.
+    \end{equation}
+　　　
+\end{theorem}
+
+\begin{theorem}
+    由式(\ref{4})定义的有限元解 $u_h$, 满足如下估计:
+    $$
+    |||u-u_h|||^2\le C\sum_{K\in\mcK}h_k^2\|D^2u\|^2_{L^2(K)}
+    $$
+\end{theorem}
+
+上面式子也可以用$L_2$形式的误差来写
+
+\begin{equation}
+\|u-u_h\|_{L^2(\Omega)}\le C\|u-u_h\|\le Ch\|D^2u\|_{L^2(\Omega)}
+\end{equation}
+
+\subsection{刚度矩阵性质}
+
+\begin{theorem}
+    刚度矩阵 A 是对称正定的, 并且条件数满足
+
+    \begin{equation}
+        \kappa(A) \le Ch^{-2}.
+    \end{equation}
+\end{theorem}
+
+这里正定仅限于边界为０的Dirchlet条件,条件数为最大和最小特征值的比值。
+\section{变系数的模型问题}
+找到 $u$, 满足:
+
+\begin{alignat}{2}
+    -\nabla\cdot(a\nabla u) & =f,\quad\text{in}\quad\Omega \\
+    -n\cdot(a\nabla u)=\kappa(u-g_D)-g_N, \quad\text{on}\quad\partial\Omega
+\end{alignat}
+
+其中 $a>0,f,\kappa>0$, $g_D$和$g_N$ 是已知函数.
+
+在空间 $V=\{v:\|v\|_{L^2(\Omega)}+\|\nabla v\|_{L^2(\Omega)}<\infty\}$ 中寻找该
+问题的解.
+
+\\ \hspace*{\fill} \\
+
+通过green公式，离散空间后可得到其有限元的模型
+
+即找到 $u\in V_h\subset V$ 满足:
+
+\begin{equation}
+\int_{\Omega}a\nabla u_h\cdot\nabla vdx+\int_{\partial\Omega}\kappa
+u_hvds=\int_{Omega}fvdx+\int_{\partial\Omega}(\kappa g_D+g_N)vds,\quad\forall
+v\in V_h
+\end{equation}
+
+\\ \hspace*{\fill} \\
+
+具体写成矩阵形式为
+
+$$
+(A+R)\xi=b+r
+$$
+
+\begin{alignat}{4}
+	A_{ij} & =\int_{\Omega}a\nabla\varphi_i\cdot\nabla\varphi_jdx \\
+	R_{ij} & =\int_{\partial\Omega}\kappa\varphi_i\varphi_jds \\
+	b_{ij} & =\int_{\Omega}f\varphi_idx \\
+	r_i & =\int_{\varphi\Omega}(\kappa g_D+g_N)\varphi_ids \\
+\end{alignat}
+
+\section{边界问题}
+
+\subsection{Dirichlet 边界}
+\subsubsection{问题模型}
+\begin{equation}
+    \begin{aligned}
+        - \Delta u & = f, \text{in} \ \Omega, \\
+        u & = g_D, \text{on}\ \partial \Omega.
+    \end{aligned}
+\end{equation}
+其中ｆ和$g_D$给定
+
+\subsubsection{空间}
+\begin{itemize}
+	\item 试探函数空间 $V_{g_{D}}=\left\{v:\|v\|_{L^{2}(\Omega)}+\|\nabla v\|_{L^{2}(\Omega)}<\infty,\left.v\right|_{\partial \Omega}=g_{D}\right\}$
+    \item 检验函数空间 $V_0  = \left\{v:\|v\|_{L^{2}(\Omega)}+\|\nabla v\|_{L^{2}(\Omega)}<\infty,\left.v\right|_{\partial \Omega}=0\right\}$
+    \item 离散后
+    \item $V_{h,g_{D}}=\left\{v \in　V_h:\left.v\right|_{\partial \Omega}=g_{D}\right\}$
+    \item $V_{h,0}  = \left\{v \in　V_h:\left.v\right|_{\partial \Omega}=0\right\}$
+\end{itemize}
+     其中$V_h$为连续线性分段空间
+     
+\subsubsection{变分形式}
+找到属于$u \in V_{g_{D}} $使得下式成立
+
+\begin{equation}
+\int_{\Omega} \nabla u \cdot \nabla v d x=\int_{\Omega} f v d x, \quad \forall v \in V_{0}
+\end{equation}
+
+\subsubsection{有限元形式}
+找到属于$u \in V_{h,g_{D}} $使得下式成立
+
+\begin{equation}
+\int_{\Omega} \nabla u_{h} \cdot \nabla v d x=\int_{\Omega} f v d x, \quad \forall v \in V_{h, 0}
+\end{equation}
+
+使用 Galerkin 正交的性质, 我们可以把内部的点和边界的点分开, 
+即内部的值和边界的值相互独立.
+
+\subsection{Neumann 边界}
+
+\subsubsection{问题模型}
+\begin{equation}
+    \begin{aligned}
+        - \Delta u & = f, \text{in} \ \Omega, \\
+        \nabla u \cdot \bfn & = g_N, \text{on}\ \partial \Omega.
+          \int_{\Omega} u d x　＆　=0
+    \end{aligned}
+\end{equation}
+其中ｆ和$g_N$给定
+
+
+\subsubsection{空间}
+\begin{itemize}
+	\item $V = {v:\|v\|_{L^{2}(\Omega)}+\|\nabla v\|_{L^{2}(\Omega)}<\infty}$
+    \item $\overline{V}=\{v\in V:\int_{\Omega}vdx=0\}$
+    \item $\overline{V_h}$ 是所有平均值为0的连续分段线性空间.
+\end{itemize}
+     其中$V_h$为连续线性分段空间
+     
+\subsubsection{变分形式}
+找到$u \in V $使得下式成立
+\begin{equation}
+\int_{\Omega} \nabla u \cdot \nabla v d x=\int_{\Omega} f v d x+\int_{\partial \Omega} g_{N} v d s, \quad \forall v \in V
+\end{equation}
+
+\subsubsection{有限元形式}
+找到属于$u_h\in\overline{V_h}\subset\overline{V}$使得下式成立
+\begin{equation}
+\int_{\Omega} \nabla u_{h} \cdot \nabla v d x=\int_{\Omega} f v d x+\int_{\partial \Omega} g_{N} v d s, \quad \forall v \in \bar{V}_{h}
+\end{equation}
+
+在 Neumann 条件下, 拉格朗日乘子趋于零.
+
+\subsection{特征值问题}
+
+\subsubsection{问题模型}
+解出函数ｕ和数$\lambda$
+\begin{equation}
+    \begin{aligned}
+        - \Delta u & = \lambda u, \text{in} \ \Omega, \\
+        \nabla u \cdot \bfn & = 0, \text{on}\ \partial \Omega.
+    \end{aligned}
+\end{equation}
+
+
+\subsubsection{变分形式}
+找到 $u\in V$ 与 $\lambda\in\mbR$ 满足:
+
+\begin{equation}
+    \int_{\Omega}\nabla u\cdot\nabla vdx=\lambda\int_{\Omega}uvdx,\forall v\in V
+\end{equation}
+
+\subsubsection{有限元形式}
+找到 $u_h\in V_h$且 $\lambda_k\in\mcR$满足:
+
+\begin{equation}
+\int_{\Omega}\nabla u_h\cdot\nabla vdx=\lambda_k\int_{\Omega}u_kvdx,\forall
+v\in V_k
+\end{equation}
+
+最后我们需要求解的线性方程组是 
+
+\begin{equation}
+    \bfA \boldsymbol {\xi} = \lambda \bfM \boldsymbol{\xi}
+\end{equation}
+
+其中 $\boldsymbol \xi$ 是 节点处的向量. 我们需要求解的是特征对 $(\xi_n,
+\lambda_n), n = 1, \cdots, n_p$. 
+
+\section{有限元方法步骤总结}
+\begin{itemize}
+\item 在等式两边乘以测试函数并积分
+\item 用散度定理简化微分次数
+\item 带入边界条件
+\item 将模型变为变分洗模型
+\item 将空间都变为分片线性连续空间
+\item 将方程变为向量矩阵形式，分别组装刚度矩阵和过载向量
+\end{itemize}
+
+\section{自适应有限元}
+
+\begin{theorem}[后验误差估计]
+    由式 (\ref{4}) 定义的有限元解 $u_h$, 满足估计
+
+    \begin{equation}
+        ||| u - u_h |||^2 \le C \sum_{K\in \mcK} \eta_K^2(u_h)
+    \end{equation}
+
+    其中, 定义单元残量 $\eta_K(u_h)$ 
+
+    \begin{equation}
+        \eta_K(u_h) = h_K\|f + \Delta u_h\|_{L^2(K)}
+                    + \frac{1}{2}h_K^{1/2}\|[\bfn \cdot \nabla
+                    u_h]\|_{L^2(\partial K \setminus \partial \Omega)}
+    \end{equation}
+
+    $[\cdot]$ 代表的是跳量, 由于在 $K$ 上 $u_h$ 是线性的, 因此$\Delta u_h = 0$
+
+\end{theorem}
+
+\subsection{自适应网格加密}
+
+高维网格加密要考虑几个问题问题
+
+\begin{itemize}
+    \item 消除悬挂点, 尽可能少加密单元
+    \item 要保证网格的最小角尽可能的大，以提高有限元解的质量
+    \item 细化网格比未细化网格更能准确描述区域
+\end{itemize}
+
+以下是两种常用的方法
+
+\subsubsection{Rivara 加密}
+
+基本概念
+\begin{itemize}
+\item treminal edges:如果一条边是共享这条边的两个三角形中最长的边，那么这个变就叫treminal edges。
+\item terminal star:共享terminal edges的两个三角形。
+\item longest edge propagation path(LEPP):就是从K开始，依次移动到相邻的边最长的三角形，直到到达terminal edges的三角形序列
+\end{itemize}
+
+具体方法是，找到从ｋ开始找到terminal edges然后用这条边的中点与相邻三角形(terminal star)的两个顶点相连，从而加密网格，每重新开始初始ｋ都不变，最终当LEEP重复时候终止。
+
+这种方法的缺点是:网格剖分较细时, 代价昂贵
+
+\subsubsection{Regular 加密}
+
+两种加密
+\begin{itemize}
+\item red refinement:将要细化的三角形各个边的中点相连接，划分成四个新的全等三角形
+\item green refinement:因为red refinement会出现悬挂点，将悬挂点个相邻三角形的定点相连接。
+\end{itemize}
+
+具体方法是，选定要细化的单选，但后用red refinement加密,若出现悬挂点再用green refinement,迭代知道没有悬挂点出现为止。
+
+显然red refinement加密质量更高，后续尽量不让green refinement过的三角形再次green refinemrnt.
+
+\end{document}

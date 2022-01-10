@@ -1,0 +1,118 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass[12pt,a4paper]{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\title{windows下ubuntu的系统安装}
+\author{王鹏详}
+\date{\chntoday}
+\begin{document}
+	\maketitle
+	\newpage
+	\subsection{制作镜像}
+	1.下载rufush镜像制作软件\\
+	github.com/pbatard/rufus\\
+	2.从ubuntu上下载最新LTS版本\\
+	3.装上ｕ盘制作ubuntu启动盘
+	\subsection{ubuntu安装前期配置}
+	1.进入bios界面，修改安全模式为AHCI(dell是f12)\\
+	2.将bios设为uefi\\
+	3.在advanced上选择enable\\
+	\subsection{ubuntu安装}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{figures/IMG_2810}
+		\caption{}
+		\label{fig:img2810}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{figures/IMG_2799}
+		\caption{}
+		\label{fig:img2799}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\linewidth]{figures/IMG_2809}
+		\caption{}
+		\label{fig:img2809}	
+	\end{figure}
+	除了分区和efi其他全部默认
+	\subsection{ubuntu配置}
+	1.在软件更新中换源，最好换成华为的\\
+	2.更新系统sudo apt upgrade，sudo apt updata\\
+	3.安装驱动(如果有问题的话，否则不用)sudo ubuntu-drivers autoinstall	\\
+	4.移除ibus 安装fcitx 安装搜狗输入法　然后重启,右上角有一个小面板，在配置里边添加搜狗输入法\\
+	5.安装常用软件sudo sh ubuntu\_install.sh , wps，配置google访问助手，将插件拖进拓展程序中\\
+	6.配置wps缺失字体，讲fonts放到usr/share/fonts里\\
+	7.安装latex sudo apt-get install texlive-full \\
+	8.安装texmaker sudo apt-get install texmaker\\
+	9.安装mathpix sudo apt-get mathpix-snipping-tool\\
+	10.安装git等，参阅老师仓库中的feapy中readme文件\\
+	11.配置自己git,参阅老师git.md\\
+	12.创建自己仓库repository\\
+	13.安装vim,参阅vim文件中readme，git clone --recurse-submodules https://github.com/weihuayi/whyvim.git\\
+	14.安装matlab\\
+	15
+	\begin{itemize}
+	 \item sudo apt install git     \qquad        版本控制软件 
+	 \item sudo apt install python3     \qquad    Python3 自带解释器 
+	 \item sudo apt install python3-pip  \qquad   Python3 软件包安装、卸载和升级管理器. 
+	 \item sudo apt install python3-tk   \qquad   Python interface to Tcl/Tk used by matplotlib 
+	 \item sudo apt install spyder3     \qquad    集成开发环境 
+	 \item sudo -H pip3 install numpy      \qquad     多维数组模块 
+	 \item sudo -H pip3 install scipy       \qquad 科学计算模块 
+	 \item sudo -H pip3 install matplotlib     \qquad 可视化模块
+	 \item sudo -H pip3 install pandas         \qquad 数据分析和清洗模块 
+	 \item sudo -H pip3 install jupyter \qquad Jupyter-notebook 
+	 \item sudo -H pip3 install ipython
+	 \item sudo -H pip3 uninstall prompt-toolkit \qquad 解决冲突问题 
+	 \item sudo -H pip3 install jupyter\_ contrib\_ nbextensions \qquad Jupyter notebook 扩展功能模块 
+	 \item sudo jupyter contrib nbextension install \qquad 把扩展功能模块安装入 Jupyter
+	 \item sudo -H pip3 isntall RISE \qquad Jupyter notebook 的幻灯片扩展，可以把 Notebook 转化为 PPT 
+	 \item sudo rm ~/.jupyter
+	\end{itemize}
+
+	
+\section{anaconda安装}
+\begin{itemize}
+\item 从官网下载anaconda:https://www.anaconda.com/distribution/\# download-section
+\item 到下载目录bash 文件名
+\item 全程直接yes就可以了
+\item 检查安装成功：到终端输入python3,conda --version,看是否有用
+\item 添加环境变量　\\
+echo 'export PATH="~/anaconda2/bin:echo 'export PATH=:\$PATH"' >> ~/.bashrc \\
+source ~/.bashrc
+\item conda update --all
+\item conda update conda
+\item conda update anconda
+\end{itemize}
+
+\subsection{打开可视化界面}
+\begin{itemize}
+\item 更新anaconda: conda update conda
+\item 开启可视化界面：1 source ~/anaconda3/bin/activate root\\
+　　　　　　　　　　　2 anaconda-navigator
+\end{itemize}
+
+\subsection{在桌面创建图标}
+\url{https://blog.csdn.net/qq_43802597/article/details/98886365}　
+
+注意命令中要改成自己的版本号和目录名
+\begin{itemize}
+\item 目录到/usr/share/applications
+\item 创建anaconda.desktop
+\item 修改文档，注意命令中要改成自己的版本号和目录名\\
+
+\item 给权限　sudo chmod a+x anaconda-navigator.desktop
+\end{itemize}
+\subsubsection{参考网址}
+	\url{https://www.dell.com/support/article/cn/zh/cnbsd1/sln301754/%E5%A6%82%E4%BD%95%E5%9C%A8-dell-pc-%E4%B8%8A%E5%AE%89%E8%A3%85-ubuntu-%E5%92%8C-windows-8-%E6%88%9610%E4%BD%9C%E4%B8%BA%E5%8F%8C%E5%BC%95%E5%AF%BC?lang=zh}
+	\\
+	\url{https://blog.csdn.net/lijiancheng0614/article/details/80866040}
+	
+	
+\end{document}
+
+
+

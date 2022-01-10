@@ -1,0 +1,41 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass[12pt,a4paper]{article}
+\input{../en_preamble.tex}
+\input{../xecjk_preamble.tex}
+\title{杂七杂八的}
+\author{王鹏详}
+\date{\chntoday}
+\begin{document}
+	\maketitle
+	\newpage
+
+\section{•}
+\begin{itemize}
+\item 下载一个程序后要把bin里的放到本地的bin( \textbf{/usr/local/bin/}),这样才可以全局直接调用命令
+\item wine 配置 \\
+WINEPREFIX=~/.deepinwine/Deepin-ThunderSpeed  /usr/bin/deepin-wine  winecfg
+\end{itemize}
+	
+\section{系统启动不了,用timeshift进行复原}
+\begin{itemize}
+\item 进入到引导界面，选择第二个ubuntu adbance
+\item 从recover ubuntu打开
+\item 选择倒数第二个，进入到root命令行模式
+\item 改变只读权限 \\mount -rw -o remount /
+\item 查看外接硬盘名字 \\ fdisk -l
+\item 建立目录用来做挂接点 \\ mkdir -p /mnt/usb1
+\item 建立挂接 \\ monut /dev/sda1 /mnt/usb1
+\item 查看timeshift快照点 \\ sudo timeshift --list
+\item 用timeshift复原 \\ sudo timeshift --restore --snapshot '2019-07-16\_16-35-42' --skip-grub
+\item 等待重启即可
+\end{itemize}
+\begin{block}{Remark}
+    参考网址:\url{https://blog.csdn.net/wf19930209/article/details/104236358}
+\end{block}
+
+\section{双显示屛鼠标闪烁}
+电脑显卡配置问题，所先把安全启动模式给关了，然后把集成显卡换成独立显卡
+\end{document}
+
+
+
